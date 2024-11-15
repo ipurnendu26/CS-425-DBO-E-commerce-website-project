@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';  // Import Link for navigation
 import axios from 'axios';
 
-const SmartLightings = ({ addToCart }) => {
+const Smartphones = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Fetch products for the 'smart lighting' category
-    axios.get('http://localhost:3001/products?category=smart lighting')
+    // Fetch products for the 'smart doorbell' category
+    axios.get('http://localhost:3001/products?category=Smartphones')
       .then((response) => {
         setProducts(response.data);
       })
@@ -24,7 +24,7 @@ const SmartLightings = ({ addToCart }) => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Smart Lightings</h2>
+      <h2 className="text-center mb-4">Smart Phones</h2>
       <div className="row">
         {products.map(product => (
           <div className="col-md-4 mb-4" key={product.id}>
@@ -53,4 +53,4 @@ const SmartLightings = ({ addToCart }) => {
   );
 };
 
-export default SmartLightings;
+export default Smartphones;

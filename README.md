@@ -56,8 +56,9 @@ Create a MySQL database called smarthomes.
 Use the provided schemas to set up the necessary tables for users, products, CustomerOrder, and orders.
 MongoDB Configuration:
 
-Make sure MongoDB is running and create a reviews collection for storing product reviews.
-Create a .env file in the smarthomes-backend/ directory and include the following variables:
+Run this command to install all the required files
+npm install express mysql2 cors body-parser uuid dotenv axios multer xml2js axios
+
 
 plaintext
 Copy code
@@ -163,33 +164,6 @@ CREATE TABLE tickets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-MongoDB Setup
-Insert sample reviews:
-
-Use MongoDB Compass or the mongo shell to add product reviews to the reviews collection. Example:
-
-json
-Copy code
-{
-  "productId": 1,
-  "productModelName": "Ring Video Doorbell 3",
-  "productCategory": "smart doorbell",
-  "productPrice": 199.99,
-  "storeID": "Store#1",
-  "storeZip": "60616",
-  "storeCity": "Chicago",
-  "storeState": "IL",
-  "productOnSale": true,
-  "manufacturerName": "Ring",
-  "manufacturerRebate": false,
-  "userID": "user001",
-  "userAge": 32,
-  "userGender": "Male",
-  "userOccupation": "Engineer",
-  "reviewRating": 5,
-  "reviewDate": "2024-09-28T00:00:00Z",
-  "reviewText": "Great product, easy to install and use."
-}
 
 
 4. Usage
@@ -200,9 +174,3 @@ Use the Trending page to view statistics like the top sold products and sales by
 Write and read reviews on individual product pages.
 Backend:
 
-API to fetch product reviews: GET /reviews?productId={productId}
-API to place orders: POST /orders
-OpenAI API Integration:
-
-Add your API key in the .env file as OPENAI_API_KEY=<your_openai_api_key>.
-Use the OpenAI API at https://platform.openai.com/ for any required AI-powered features.

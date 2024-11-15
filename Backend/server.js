@@ -11,14 +11,7 @@ let productMap = new Map();
 const multer = require('multer');
 
 const axios = require('axios');  // Add this line to import Axios
-// const { Configuration, OpenAIApi } = require('openai');
 require('dotenv').config(); // Load environment variables from .env
-
-// const configuration = new Configuration({
-//   apiKey: process.env.OPENAI_API_KEY // Use your API key securely
-// });
-
-// const openai = new OpenAIApi(configuration);
 
 
 
@@ -32,24 +25,6 @@ const app = express();  // Initialize app first
 
 
 app.use(express.json());
-
-
-
-// const multer = require('multer');
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     // Save images to a specific directory (e.g., 'uploads')
-//     const uploadDir = 'uploads';
-//     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir); // Create directory if it doesn't exist
-//     cb(null, uploadDir);
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, `${uuidv4()}${path.extname(file.originalname)}`);
-//   },
-// });
-
-// const upload = multer({ storage });
-
 
 
 
@@ -69,53 +44,9 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'rishabh',  // Replace with your MySQL root password
-    database: 'smarthome'
+    database: 'project'
 });
 
-
-// const loadProductsFromXML = () => {
-//   const parser = new xml2js.Parser();
-//   fs.readFile('path/to/ProductCatalog.xml', (err, data) => {
-//       if (err) {
-//           console.error('Error reading XML file:', err);
-//           return;
-//       }
-
-//       parser.parseString(data, (err, result) => {
-//           if (err) {
-//               console.error('Error parsing XML:', err);
-//               return;
-//           }
-
-//           const products = result.catalog.product;  // Assuming XML has <catalog><product> elements
-//           products.forEach(product => {
-//               productMap.set(product.id[0], {
-//                   name: product.name[0],
-//                   price: product.price[0],
-//                   stock: product.stock[0]
-//               });
-//           });
-
-//           console.log('Products loaded into productMap:', productMap);
-//       });
-//   });
-// };
-
-// Load products into the Map when the server starts
-// loadProductsFromXML();
-
-// // Function to sync MySQL with the productMap
-// const syncProductToMySQL = (productId, productData) => {
-//   const query = `INSERT INTO products (id, name, price, stock) VALUES (?, ?, ?, ?)
-//                  ON DUPLICATE KEY UPDATE name = ?, price = ?, stock = ?`;
-
-//   db.query(query, [productId, productData.name, productData.price, productData.stock,
-//                    productData.name, productData.price, productData.stock], (err, result) => {
-//       if (err) {
-//           console.error('Error syncing product to MySQL:', err);
-//       }
-//   });
-// };
 
 // Connect to MySQL
 db.connect((err) => {
@@ -251,13 +182,13 @@ app.delete('/products/:id', (req, res) => {
 
 
 app.post('/place-order', (req, res) => {
-  const { userId, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
+  const { userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
 
   // Log the incoming request body to check for missing fields
   console.log('Request Body:', req.body);
 
   // Validate required fields
-  if (!userId || !totalPrice || !deliveryMethod || !cartItems || !address || !creditCard) {
+  if (!userId || !name || !totalPrice || !deliveryMethod || !cartItems || !address || !creditCard || (!storeLocation && deliveryMethod === 'inStorePickup')) {
       return res.status(400).json({ message: 'Missing required order information' });
   }
 
@@ -266,7 +197,7 @@ app.post('/place-order', (req, res) => {
 
   // Insert into the orders table
   const orderQuery = `
-      INSERT INTO orders (user_id, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
+      INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
       VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)
   `;
   
@@ -306,7 +237,8 @@ app.post('/place-order', (req, res) => {
             VALUES ?
         `;
         const orderItems = [[
-            userId,  // Assuming userId as userName, adjust this based on your schema
+            // userId, // Assuming userId as userName, adjust this based on your schema
+            name,   
             item.name,
             item.price,
             address,
@@ -434,12 +366,12 @@ app.get('/orders', (req, res) => {
   });
 });
 
-// API: Update an order
+// API: Update an order, including status
 app.put('/orders/:id', (req, res) => {
   const { id } = req.params;
-  const { total_price, delivery_method, store_location, delivery_date } = req.body;
-  const query = 'UPDATE orders SET total_price = ?, delivery_method = ?, store_location = ?, delivery_date = ? WHERE id = ?';
-  db.query(query, [total_price, delivery_method, store_location, delivery_date, id], (err, result) => {
+  const { total_price, delivery_method, store_location, delivery_date, status } = req.body;
+  const query = 'UPDATE orders SET total_price = ?, delivery_method = ?, store_location = ?, delivery_date = ?, status = ? WHERE id = ?';
+  db.query(query, [total_price, delivery_method, store_location, delivery_date, status, id], (err, result) => {
     if (err) {
       console.error('Error updating order:', err);
       return res.status(500).json({ message: 'Error updating order' });
@@ -447,6 +379,7 @@ app.put('/orders/:id', (req, res) => {
     res.status(200).json({ message: 'Order updated successfully' });
   });
 });
+
 
 // API: Delete an order
 app.delete('/orders/:id', (req, res) => {
@@ -703,278 +636,6 @@ app.get('/autocomplete', (req, res) => {
       res.json(results);  // Return both id and name
   });
 });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = './uploads';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-const upload = multer({ storage });
-
-// Helper function to encode image to base64
-function encodeImage(imagePath) {
-  const image = fs.readFileSync(imagePath);
-  return image.toString('base64');
-}
-
-// POST route to create a new ticket
-app.post('/tickets', upload.single('image'), async (req, res) => {
-  const { name, email, category, description } = req.body;
-  const image = req.file;
-  const ticketNumber = 'TICKET-' + uuidv4();
-
-  if (!name || !email || !category || !description || !image) {
-    return res.status(400).json({ message: 'All fields are required, including an image' });
-  }
-
-  const imagePath = path.join('uploads', image.filename);
-  const base64Image = encodeImage(imagePath);
-
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Describe the image.' },
-              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
-            ],
-          }
-        ],
-        max_tokens: 150,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer YOUR_API_KEY`, // Insert actual API key here
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    const imageDescription = response.data.choices[0].message.content.trim();
-
-    const decisionPrompt = `Based on the following image description: "${imageDescription}", decide which action should be taken...`;
-
-    const decisionResponse = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: decisionPrompt }
-        ],
-        max_tokens: 50,
-        temperature: 0.5,
-      },
-      {
-        headers: {
-          Authorization: `Bearer YOUR_API_KEY`, // Insert actual API key here
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    const decision = decisionResponse.data.choices[0].message.content.trim();
-
-    let status = 'Undetermined';
-    if (decision.includes('Refund Order')) status = 'Refund Order';
-    else if (decision.includes('Replace Order')) status = 'Replace Order';
-    else if (decision.includes('Escalate to Human Agent')) status = 'Escalate to Human Agent';
-
-    const query = `INSERT INTO tickets (name, email, category, description, image, ticket_number, status) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
-    db.query(query, [name, email, category, description, imagePath, ticketNumber, status], (err, result) => {
-      if (err) {
-        console.error('Error creating ticket:', err);
-        return res.status(500).json({ message: 'Error creating ticket' });
-      }
-      res.status(201).json({ message: 'Ticket created successfully', ticketNumber, status });
-    });
-  } catch (error) {
-    console.error('Error processing image with OpenAI:', error);
-    res.status(500).json({ message: 'Error processing the image or decision' });
-  }
-});
-
-// GET route to retrieve ticket details and status
-app.get('/tickets/status/:ticketNumber', (req, res) => {
-  const ticketNumber = req.params.ticketNumber;
-
-  const query = 'SELECT * FROM tickets WHERE ticket_number = ?';
-
-  db.query(query, [ticketNumber], (err, results) => {
-    if (err) {
-      console.error('Error fetching ticket:', err);
-      return res.status(500).json({ message: 'Error fetching ticket' });
-    }
-
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'Ticket not found' });
-    }
-
-    const ticket = results[0];
-    res.status(200).json({
-      message: 'Ticket details retrieved successfully',
-      decision: ticket.status, // Adjusted field name to match frontend
-      ticketDetails: ticket,
-    });
-  });
-});
-
-
-
-
-
-
-
-
-
-
-
-
-// MongoDB setup
-const mongoURI = 'mongodb://127.0.0.1:27017/myreview';  // Connect to the MongoDB database
-mongoose.connect(mongoURI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
-
-// MongoDB Review Schema
-const reviewSchema = new mongoose.Schema({
-  productId: Number,
-  productModelName: String,
-  productCategory: String,
-  productPrice: Number,
-  storeID: String,
-  storeZip: String,
-  storeCity: String,
-  storeState: String,
-  productOnSale: Boolean,  // Use Boolean for true/false values
-  manufacturerName: String,
-  manufacturerRebate: Boolean,  // Use Boolean for true/false values
-  userID: String,
-  userAge: Number,
-  userGender: String,
-  userOccupation: String,
-  reviewRating: Number,
-  reviewDate: Date,
-  reviewText: String
-});
-
-const Review = mongoose.model('Review', reviewSchema);
-
-// MongoDB Ticket Schema
-const ticketSchema = new mongoose.Schema({
-  ticketNumber: {
-     type: Number,
-     required: true,
-     unique: true
-  },
-  description: {
-     type: String,
-     required: true
-  },
-  imagePath: {
-     type: String,
-     required: true
-  },
-  status: {
-     type: String,
-     default: 'Pending'
-  },
-  createdAt: {
-     type: Date,
-     default: Date.now
-  },
-  decision: {
-     type: String,
-     enum: ['Refund Order', 'Replace Order', 'Escalate to Human Agent'],  // Example options
-     default: 'Pending'
-  }
-});
-
-// Create a model from the schema
-const Ticket = mongoose.model('Ticket', ticketSchema);
-
-
-// API to handle review submission
-app.post('/reviews', async (req, res) => {
-  try {
-    const reviewData = req.body;
-
-    // Ensure boolean fields default to false if not provided
-    reviewData.productOnSale = reviewData.productOnSale || false;
-    reviewData.manufacturerRebate = reviewData.manufacturerRebate || false;
-
-    // Create a new review instance
-    const newReview = new Review(reviewData);
-
-    // Save the review
-    const savedReview = await newReview.save();
-
-    // Return the saved review
-    res.status(201).json({ message: 'Review submitted successfully', review: savedReview });
-  } catch (err) {
-    console.error('Error saving review:', err);
-    res.status(500).json({ message: 'Error saving review', error: err.message });
-  }
-});
-
-// API to fetch reviews for a specific product (if productId is stored as a number)
-app.get('/reviews', async (req, res) => {
-  const productId = Number(req.query.productId); // Convert productId to a number
-
-  if (isNaN(productId)) {
-    return res.status(400).json({ message: 'Invalid productId provided' });
-  }
-
-  try {
-    const reviews = await Review.find({ productId: productId });
-    res.status(200).json(reviews);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching reviews', error: err.message });
-  }
-});
-
-// Top five most liked products
-app.get('/trending/most-liked', async (req, res) => {
-  try {
-    const topLikedProducts = await Review.aggregate([
-      {
-        $group: {
-          _id: "$productId",
-          averageRating: { $avg: "$reviewRating" }
-        }
-      },
-      { $sort: { averageRating: -1 } },
-      { $limit: 5 }
-    ]);
-    res.status(200).json(topLikedProducts);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching most liked products', error });
-  }
-});
-
-
-
-
-
-
-
-
-
-
 
 
 

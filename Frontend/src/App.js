@@ -9,11 +9,11 @@ import SignupForm from './components/SignupForm';
 import StoreManager from './components/StoreManager';
 import Salesman from './components/Salesman';
 import CustomerDashboard from './components/CustomerDashboard';
-import AdvancedSmartDoorbells from './components/AdvancedSmartDoorbells';
-import SmartDoorlocks from './components/SmartDoorlocks';
-import SmartSpeakers from './components/SmartSpeakers';
-import SmartLightings from './components/SmartLightings';
-import VideoDoorbellPro from './components/VideoDoorbellPro';
+import Smartphones from './components/Smartphones';
+import Laptops from './components/Laptops';
+import HomeGadgets from './components/HomeGadgets';
+import Wearables from './components/Wearables';
+import Accessories from './components/Accessories';
 import Profile from './components/Profile';
 import ProductDetails from './components/ProductDetail';
 import ReviewForm from './components/ReviewForm';
@@ -60,11 +60,11 @@ const App = () => {
         <Route path="/customer" element={<CustomerDashboard />} />
 
         {/* Product Pages */}
-        <Route path="/products/doorbells" element={<AdvancedSmartDoorbells addToCart={addToCart} />} />
-        <Route path="/products/doorlocks" element={<SmartDoorlocks addToCart={addToCart} />} />
-        <Route path="/products/lightings" element={<SmartLightings addToCart={addToCart} />} />
-        <Route path="/products/speakers" element={<SmartSpeakers addToCart={addToCart} />} />
-        <Route path="/products/thermostats" element={<VideoDoorbellPro addToCart={addToCart} />} />
+        <Route path="/products/smartphones" element={<Smartphones addToCart={addToCart} />} />
+        <Route path="/products/laptops" element={<Laptops addToCart={addToCart} />} />
+        <Route path="/products/wearables" element={<Wearables addToCart={addToCart} />} />
+        <Route path="/products/homegadgets" element={<HomeGadgets addToCart={addToCart} />} />
+        <Route path="/products/accessories" element={<Accessories addToCart={addToCart} />} />
         <Route path="/products/:id" element={<ProductDetails addToCart={addToCart} />} />
 
         {/* Cart and Checkout */}
