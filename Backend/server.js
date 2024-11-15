@@ -58,62 +58,59 @@ db.connect((err) => {
 });
 
 // Register a new user
-app.post('/signup', async (req, res) => {
-    const { name, email, password, role } = req.body;
+app.post('/signup', (req, res) => {
+  const { name, email, password, role } = req.body;
 
-    // Hash the password before storing it in the database
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const query = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
 
-    const query = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
-
-    db.query(query, [name, email, hashedPassword, role], (err, result) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error registering user', error: err });
-        }
-        return res.status(200).json({ message: 'User registered successfully' });
-    });
+  db.query(query, [name, email, password, role], (err, result) => {
+      if (err) {
+          return res.status(500).json({ message: 'Error registering user', error: err });
+      }
+      return res.status(200).json({ message: 'User registered successfully' });
+  });
 });
 
+// Login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   // Check if both email and password are provided
   if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ message: 'Email and password are required' });
   }
 
   // Query to find the user by email
   const query = 'SELECT * FROM users WHERE email = ?';
   db.query(query, [email], (err, results) => {
-    if (err) {
-      console.error('Database error:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-
-    // If no user is found with the provided email
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const user = results[0];
-
-    // Assuming you're using bcrypt to hash passwords (adjust this if you're using plain text)
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err || !isMatch) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Internal server error' });
       }
 
-      // Login is successful, return the user id and role
+      // If no user is found with the provided email
+      if (results.length === 0) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      const user = results[0];
+
+      // Check if the password matches
+      if (password !== user.password) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // Login is successful, return the user details
       res.status(200).json({
-        message: ' successful',
-        id: user.id,   // Include the user id in the response
-        role: user.role,
-        email: user.email,
-        name: user.name
+          message: 'Login successful',
+          id: user.id,   // Include the user id in the response
+          role: user.role,
+          email: user.email,
+          name: user.name
       });
-    });
   });
 });
+
 
 
 app.get('/products', (req, res) => {
@@ -182,7 +179,7 @@ app.delete('/products/:id', (req, res) => {
 
 
 app.post('/place-order', (req, res) => {
-  const { userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
+const { userId,name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
 
   // Log the incoming request body to check for missing fields
   console.log('Request Body:', req.body);
@@ -198,7 +195,7 @@ app.post('/place-order', (req, res) => {
   // Insert into the orders table
   const orderQuery = `
       INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
-      VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)
+   VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
   `;
   
   cartItems.forEach((item) => {
@@ -206,7 +203,7 @@ app.post('/place-order', (req, res) => {
     console.log('Inserting order for product ID:', item.product_id);
 
     // Insert each cart item as a separate order with its respective product_id and quantity
-    db.query(orderQuery, [userId, totalPrice, deliveryMethod, storeLocation, deliveryDate, item.product_id, item.quantity], (err, result) => {
+    db.query(orderQuery, [userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, item.product_id, item.quantity], (err, result) => {
         if (err) {
             console.error('Error inserting into orders table:', err);  // Log the specific error
             return res.status(500).json({ message: 'Error placing order', error: err.message });
@@ -234,27 +231,24 @@ app.post('/place-order', (req, res) => {
         // Insert each item into the CustomerOrder table
         const customerOrderQuery = `
             INSERT INTO CustomerOrder (userName, orderName, orderPrice, userAddress, creditCardNo)
-            VALUES ?
+            VALUES (?, ?, ?, ?, ?)
         `;
-        const orderItems = [[
-            // userId, // Assuming userId as userName, adjust this based on your schema
-            name,   
-            item.name,
-            item.price,
-            address,
-            creditCard
-        ]];
-
-        console.log('Order items to be inserted:', orderItems);
-
-        db.query(customerOrderQuery, [orderItems], (err) => {
-            if (err) {
-                console.error('Error inserting order items into CustomerOrder table:', err);  // Log the specific error
-                return res.status(500).json({ message: 'Error inserting order items', error: err.message });
-            }
-
-            console.log('Order items inserted successfully');
+ const orderItems = [
+          name,   
+          item.name,
+          item.price,
+          address,
+          creditCard
+        ];
+        
+        db.query(customerOrderQuery, orderItems, (err) => { // Pass directly
+          if (err) {
+            console.error('Error inserting order items into CustomerOrder table:', err);
+            return res.status(500).json({ message: 'Error inserting order items', error: err.message });
+          }
+          console.log('Order items inserted successfully');
         });
+        
     });
   });
 
@@ -267,7 +261,7 @@ app.get('/past-orders/:userId', (req, res) => {
   const userId = req.params.userId;  // Extract userId from request parameters
 
   const query = `
-    SELECT id, total_price, delivery_method, status, delivery_date
+    SELECT id, name, total_price, delivery_method, status, delivery_date
     FROM orders
     WHERE user_id = ?
   `;
@@ -282,69 +276,68 @@ app.get('/past-orders/:userId', (req, res) => {
   });
 });
 
+// app.delete('/cancel-order/:orderId', (req, res) => {
+//   const orderId = req.params.orderId;
+//   console.log('Deleting order with ID:', orderId); // Log the orderId for debugging
+
+//   const query = `
+//     DELETE FROM orders
+//     WHERE id = ?
+//   `;
+
+//   db.query(query, [orderId], (err, result) => {
+//     if (err) {
+//       console.error('Error deleting order:', err);
+//       return res.status(500).json({ message: 'Error deleting order' });
+//     }
+
+//     if (result.affectedRows === 0) {
+//       return res.status(404).json({ message: 'Order not found' });
+//     }
+
+//     res.status(200).json({ message: 'Order deleted successfully' });
+//   });
+// });
 app.delete('/cancel-order/:orderId', (req, res) => {
   const orderId = req.params.orderId;
-  console.log('Deleting order with ID:', orderId); // Log the orderId for debugging
 
-  const query = `
-    DELETE FROM orders
-    WHERE id = ?
-  `;
+  // Validate orderId
+  if (!orderId || isNaN(parseInt(orderId))) {
+    console.error("Invalid order ID received in backend:", orderId);
+    return res.status(400).json({ message: "Invalid order ID" });
+  }
+
+  console.log("Processing deletion for order ID:", orderId);
+
+  // Use 'id' to delete the order
+  const query = `DELETE FROM orders WHERE id = ?`;
 
   db.query(query, [orderId], (err, result) => {
     if (err) {
-      console.error('Error deleting order:', err);
-      return res.status(500).json({ message: 'Error deleting order' });
+      console.error("Error executing DELETE query:", err);
+      return res.status(500).json({ message: "Error deleting order", error: err.message });
     }
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Order not found' });
+      console.error("No order found with ID:", orderId);
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    res.status(200).json({ message: 'Order deleted successfully' });
+    console.log("Order deleted successfully:", orderId);
+    res.status(200).json({ message: "Order deleted successfully" });
   });
 });
 
 
-// API: Add a customer
-app.post('/customers', async (req, res) => {
-  const { name, email, password } = req.body;
-  
-  try {
-    // Hash the password before storing it in the database
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert into the database with the hashed password
-    const query = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, "customer")';
-    db.query(query, [name, email, hashedPassword], (err, result) => {
-      if (err) {
-        console.error('Error creating customer:', err);
-        return res.status(500).json({ message: 'Error creating customer' });
-      }
-      res.status(201).json({ message: 'Customer created successfully' });
-    });
-  } catch (error) {
-    console.error('Error hashing password:', error);
-    return res.status(500).json({ message: 'Error hashing password' });
-  }
-});
 
-// API: Fetch all customers
-app.get('/customers', (req, res) => {
-  const query = 'SELECT * FROM users WHERE role = "customer"';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching customers:', err);
-      return res.status(500).json({ message: 'Error fetching customers' });
-    }
-    res.status(200).json(results);
-  });
-});
+
+
 
 // API: Add an order
 app.post('/orders', (req, res) => {
   const { user_id, total_price, delivery_method, store_location, delivery_date } = req.body;
-  const query = 'INSERT INTO orders (user_id, total_price, delivery_method, store_location, delivery_date) VALUES (?, ?, ?, ?, ?)';
+  const query = 'INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, delivery_date) VALUES (?, ?, ?, ?, ?, ?)';
   db.query(query, [user_id, total_price, delivery_method, store_location, delivery_date], (err, result) => {
     if (err) {
       console.error('Error adding order:', err);

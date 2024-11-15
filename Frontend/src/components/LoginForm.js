@@ -28,10 +28,9 @@ const LoginForm = () => {
           localStorage.setItem('userName', userName);  // Storing username
 
           // Navigate to the appropriate dashboard based on the user role
-          if (userRole === 'storeManager') {
+         if (userRole === 'storeManager') {
             navigate('/store-manager');
-          } 
-          else {
+          } else {
             navigate('/customer');
           }
         } else {

@@ -23,17 +23,21 @@ const PastOrders = () => {
 
   // Handle cancel order
   const handleCancelOrder = (orderId) => {
-    axios.delete(`http://localhost:3001/cancel-order/${orderId}`)  // Change to DELETE method
-      .then(response => {
-        alert('Order canceled successfully');
-        // Reload orders after cancellation
-        setOrders(orders.map(order => order.id === orderId ? { ...order, status: 'cancelled' } : order));
+    console.log("Order ID to delete:", orderId); // Debug log
+    axios
+      .delete(`http://localhost:3001/cancel-order/${orderId}`)
+      .then((response) => {
+        alert("Order canceled successfully");
+        setOrders(orders.map((order) =>
+          order.id === orderId ? { ...order, status: "cancelled" } : order
+        ));
       })
-      .catch(error => {
-        console.error('Error canceling order:', error);
-        alert('Error canceling order');
+      .catch((error) => {
+        console.error("Error canceling order:", error);
+        alert("Error canceling order");
       });
   };
+  
 
   // Handle update order status
   const handleUpdateOrder = (orderId) => {
