@@ -28,7 +28,7 @@ const LoginForm = () => {
           localStorage.setItem('userName', userName);  // Storing username
 
           // Navigate to the appropriate dashboard based on the user role
-          if (userRole === 'storeManager') {
+         if (userRole === 'storeManager') {
             navigate('/store-manager');
           } else {
             navigate('/customer');
@@ -78,7 +78,6 @@ const LoginForm = () => {
             required
           >
             <option value="customer">Customer</option>
-      
             <option value="storeManager">Store Manager</option>
           </select>
         </div>

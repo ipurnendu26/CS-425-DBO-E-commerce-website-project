@@ -1,0 +1,16 @@
+Review_ID,Customer_ID,Product_ID,Rating,Review_Text,Review_Date
+5001,1,101,5,"Great laptop!",2024-08-20
+5002,2,102,4,"Good phone, but overpriced",2024-08-21
+5003,3,103,5,"Excellent sound quality",2024-08-22
+5004,4,104,3,"Decent coffee maker",2024-08-23
+5005,5,105,4,"Comfortable t-shirt",2024-08-24
+5006,6,106,5,"Couldn't put it down!",2024-08-25
+5007,7,107,4,"Good basketball",2024-08-26
+5008,8,108,3,"Hose is okay",2024-08-27
+5009,9,109,5,"Love this lipstick",2024-08-28
+5010,10,110,4,"Fun LEGO set",2024-08-29
+5011,11,111,3,"Average air freshener",2024-08-30
+5012,12,112,5,"Beautiful necklace",2024-08-31
+5013,13,113,4,"Good coffee",2024-09-01
+5014,14,114,5,"Great dog leash",2024-09-02
+5015,15,115,4,"Good quality paper",2024-09-03

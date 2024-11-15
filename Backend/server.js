@@ -179,7 +179,7 @@ app.delete('/products/:id', (req, res) => {
 
 
 app.post('/place-order', (req, res) => {
-  const { userId,name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
+const { userId,name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
 
   // Log the incoming request body to check for missing fields
   console.log('Request Body:', req.body);
@@ -195,7 +195,7 @@ app.post('/place-order', (req, res) => {
   // Insert into the orders table
   const orderQuery = `
       INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+   VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
   `;
   
   cartItems.forEach((item) => {
@@ -233,7 +233,7 @@ app.post('/place-order', (req, res) => {
             INSERT INTO CustomerOrder (userName, orderName, orderPrice, userAddress, creditCardNo)
             VALUES (?, ?, ?, ?, ?)
         `;
-        const orderItems = [
+ const orderItems = [
           name,   
           item.name,
           item.price,
