@@ -5,33 +5,33 @@ const ProductList = () => {
   const categories = [
     {
       id: 1,
-      name: 'Advanced Smart Doorbells',
-      description: 'Upgrade your home security with HD video, motion detection, and two-way audio capabilities.',
-      link: '/products/doorbells'
+      name: 'Smartphones',
+      description: 'Innovative mobile devices that combine communication, computing, and entertainment into a compact and user-friendly design.',
+      link: '/products/smartphones'
     },
     {
       id: 2,
-      name: 'Smart Doorlocks',
-      description: 'Smart doorlocks with keyless entry and enhanced encryption for secure and easy access.',
-      link: '/products/doorlocks'
+      name: 'Laptops',
+      description: 'High-performance portable computers designed for productivity, entertainment, and gaming, offering sleek designs and advanced features.',
+      link: '/products/laptops'
     },
     {
       id: 3,
-      name: 'Smart Speakers',
-      description: 'Voice-activated smart speakers with built-in assistant and superior sound quality.',
-      link: '/products/speakers'
+      name: 'Home Gadgets',
+      description: 'Smart devices that simplify home management, improve comfort, and bring cutting-edge technology to everyday living',
+      link: '/products/homegadgets'
     },
     {
       id: 4,
-      name: 'Smart Lightings',
-      description: 'Customizable smart lighting systems with voice and app control for ambiance creation.',
-      link: '/products/lightings'
+      name: 'Wearables',
+      description: 'Stylish and functional tech gadgets, such as smartwatches and fitness bands, that track health and keep you connected on the go.',
+      link: '/products/wearables'
     },
     {
       id: 5,
-      name: 'Video Doorbell Pro',
-      description: 'High-end video doorbell with facial recognition, night vision, and cloud storage integration.',
-      link: '/products/videodoorbellpro'
+      name: 'Accessories',
+      description: 'Essential tech add-ons, including chargers, cases, earbuds, and keyboards, that enhance usability and convenience for your devices',
+      link: '/products/accessories'
     }    
   ];
 

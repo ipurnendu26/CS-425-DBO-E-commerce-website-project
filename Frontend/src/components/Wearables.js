@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';  // Import Link for navigation
 import axios from 'axios';
 
-const VideoDoorbellPro = ({ addToCart }) => {
+const Wearables = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Fetch products for the 'smart thermostat' category
-    axios.get('http://localhost:3001/products?category=video doorbell pro')
+    // Fetch products for the 'smart lighting' category
+    axios.get('http://localhost:3001/products?category=Wearables')
       .then((response) => {
         setProducts(response.data);
       })
@@ -24,7 +24,7 @@ const VideoDoorbellPro = ({ addToCart }) => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Video Doorbell Pro</h2>
+      <h2 className="text-center mb-4">Wearables</h2>
       <div className="row">
         {products.map(product => (
           <div className="col-md-4 mb-4" key={product.id}>
@@ -53,4 +53,4 @@ const VideoDoorbellPro = ({ addToCart }) => {
   );
 };
 
-export default VideoDoorbellPro;
+export default Wearables;

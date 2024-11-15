@@ -66,6 +66,7 @@ const PastOrders = () => {
             <thead className="thead-dark">
               <tr>
                 <th>Order ID</th>
+                <th>Name</th>
                 <th>Total Price</th>
                 <th>Delivery Method</th>
                 <th>Status</th>
@@ -77,6 +78,7 @@ const PastOrders = () => {
               {orders.map(order => (
                 <tr key={order.id} className={order.status === 'cancelled' ? 'table-danger' : ''}>
                   <td>{order.id}</td>
+                  <td>{order.name}</td>
                   <td>${order.total_price}</td>
                   <td>{order.delivery_method}</td>
                   <td>

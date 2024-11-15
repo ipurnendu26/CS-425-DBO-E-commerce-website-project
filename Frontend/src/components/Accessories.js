@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';  // Import Link for navigation
 import axios from 'axios';
 
-const SmartSpeakers = ({ addToCart }) => {
+const Accessories = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Fetch products for the 'smart speaker' category
-    axios.get('http://localhost:3001/products?category=smart speaker')
+    // Fetch products for the 'smart thermostat' category
+    axios.get('http://localhost:3001/products?category=Accessories')
       .then((response) => {
         setProducts(response.data);
       })
@@ -24,7 +24,7 @@ const SmartSpeakers = ({ addToCart }) => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Smart Speaker</h2>
+      <h2 className="text-center mb-4">Accessories</h2>
       <div className="row">
         {products.map(product => (
           <div className="col-md-4 mb-4" key={product.id}>
@@ -53,4 +53,4 @@ const SmartSpeakers = ({ addToCart }) => {
   );
 };
 
-export default SmartSpeakers;
+export default Accessories;

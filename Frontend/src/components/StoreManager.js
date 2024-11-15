@@ -86,6 +86,130 @@ const StoreManager = () => {
       : setNewProduct({ ...newProduct, [name]: value });
   };
 
+
+
+  const [customers, setCustomers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'customer'
+  });
+  const [newOrder, setNewOrder] = useState({
+    user_id: '',
+    total_price: '',
+    delivery_method: 'homeDelivery',
+    store_location: '',
+    delivery_date: ''
+  });
+  const [editOrder, setEditOrder] = useState(null);
+
+  useEffect(() => {
+    fetchCustomers();
+    fetchOrders();
+  }, []);
+
+  // Fetch all customers
+  const fetchCustomers = () => {
+    axios.get('http://localhost:3001/customers')
+      .then(response => {
+        setCustomers(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching customers:', error);
+      });
+  };
+
+  // Fetch all orders
+  const fetchOrders = () => {
+    axios.get('http://localhost:3001/orders')
+      .then(response => {
+        setOrders(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching orders:', error);
+      });
+  };
+
+  // Handle customer creation
+  const handleAddCustomer = (e) => {
+    e.preventDefault();
+    axios.post('http://localhost:3001/customers', newCustomer)
+      .then(response => {
+        alert('Customer created successfully');
+        fetchCustomers();
+        setNewCustomer({
+          name: '',
+          email: '',
+          password: '',
+          role: 'customer'
+        });
+      })
+      .catch(error => {
+        console.error('Error creating customer:', error);
+      });
+  };
+
+  // Handle order creation
+  const handleAddOrder = (e) => {
+    e.preventDefault();
+    axios.post('http://localhost:3001/orders', newOrder)
+      .then(response => {
+        alert('Order added successfully');
+        fetchOrders();
+        setNewOrder({
+          user_id: '',
+          total_price: '',
+          delivery_method: 'homeDelivery',
+          store_location: '',
+          delivery_date: ''
+        });
+      })
+      .catch(error => {
+        console.error('Error adding order:', error);
+      });
+  };
+
+  // Handle order update
+  const handleUpdateOrder = (e) => {
+    e.preventDefault();
+    axios.put(`http://localhost:3001/orders/${editOrder.id}`, editOrder)
+      .then(response => {
+        alert('Order updated successfully');
+        fetchOrders();
+        setEditOrder(null); // Reset the form
+      })
+      .catch(error => {
+        console.error('Error updating order:', error);
+      });
+  };
+
+  // Handle order deletion
+  const handleDeleteOrder = (orderId) => {
+    axios.delete(`http://localhost:3001/orders/${orderId}`)
+      .then(response => {
+        alert('Order deleted successfully');
+        fetchOrders();
+      })
+      .catch(error => {
+        console.error('Error deleting order:', error);
+      });
+  };
+
+  // Handle input change for customers and orders
+  const handleInputChangeCustomer = (e, isOrderEdit = false, isCustomer = false) => {
+    const { name, value } = e.target;
+
+    if (isOrderEdit && editOrder) {
+      setEditOrder({ ...editOrder, [name]: value });
+    } else if (isCustomer) {
+      setNewCustomer({ ...newCustomer, [name]: value });
+    } else {
+      setNewOrder({ ...newOrder, [name]: value });
+    }
+  };
+
   return (
     <div className="store-manager-container">
       <h1>Welcome to Store Manager Dashboard</h1>
@@ -122,11 +246,11 @@ const StoreManager = () => {
           onChange={handleInputChange}
           required
         >
-          <option value="smart doorbell">Smart Doorbell</option>
-          <option value="smart doorlock">Smart Doorlock</option>
-          <option value="smart lighting">Smart Lighting</option>
-          <option value="smart speaker">Smart Speaker</option>
-          <option value="video doorbell pro">Video Doorbell Pro</option>
+          <option value="smartphones">Smart Phones</option>
+            <option value="laptops">Laptops</option>
+            <option value="homegadgets">Home Gadgets</option>
+            <option value="wearables">Wearables</option>
+            <option value="accessories">Accessories</option>
         </select>
         <textarea
           name="accessories"
@@ -198,11 +322,11 @@ const StoreManager = () => {
             onChange={(e) => handleInputChange(e, true)}
             required
           >
-            <option value="smart doorbell">Smart Doorbell</option>
-            <option value="smart doorlock">Smart Doorlock</option>
-            <option value="smart lighting">Smart Lighting</option>
-            <option value="smart speaker">Smart Speaker</option>
-            <option value="video doorbell pro">Video Doorbell Pro</option>
+            <option value="smartphones">Smart Phones</option>
+            <option value="laptops">Laptops</option>
+            <option value="homegadgets">Home Gadgets</option>
+            <option value="wearables">Wearables</option>
+            <option value="accessories">Accessories</option>
           </select>
           <textarea
             name="accessories"
@@ -288,6 +412,101 @@ const StoreManager = () => {
           ))}
         </tbody>
       </table>
+<br></br>
+<br></br>
+      <h3>Order List</h3>
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total Price</th>
+            <th>Delivery Method</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id}>
+              <td>{order.id}</td>
+              <td>{order.user_id}</td>
+              <td>{order.total_price}</td>
+              <td>{order.delivery_method}</td>
+              <td>{order.status}</td>
+              <td>
+                <button
+                  className="btn btn-primary btn-sm me-2"
+                  onClick={() => setEditOrder(order)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDeleteOrder(order.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Update Order Form */}
+      {editOrder && (
+        <form onSubmit={handleUpdateOrder} className="mb-4">
+          <h3>Update Order</h3>
+          <div className="mb-3">
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Total Price"
+              name="total_price"
+              value={editOrder.total_price}
+              onChange={(e) => handleInputChangeCustomer(e, true)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <select
+              className="form-select"
+              name="delivery_method"
+              value={editOrder.delivery_method}
+              onChange={(e) => handleInputChangeCustomer(e, true)}
+              required
+            >
+              <option value="homeDelivery">Home Delivery</option>
+              <option value="inStorePickup">In-store Pickup</option>
+            </select>
+          </div>
+          <div className="mb-3">
+            <input
+              type="date"
+              className="form-control"
+              name="delivery_date"
+              value={editOrder.delivery_date}
+              onChange={(e) => handleInputChangeCustomer(e, true)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <select
+              className="form-select"
+              name="status"
+              value={editOrder.status}
+              onChange={(e) => handleInputChangeCustomer(e, true)}
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="canceled">Canceled</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-warning">Update Order</button>
+        </form>
+      )}
     </div>
   );
 };
