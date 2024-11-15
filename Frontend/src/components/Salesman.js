@@ -128,7 +128,7 @@ const Salesman = () => {
     <div className="container mt-5">
       <h1>Salesman Dashboard</h1>
 
-      {/* Add Customer Form */}
+      {/* Add Customer Form
       <form onSubmit={handleAddCustomer} className="mb-4">
         <h3>Add New Customer</h3>
         <div className="mb-3">
@@ -165,9 +165,9 @@ const Salesman = () => {
           />
         </div>
         <button type="submit" className="btn btn-primary">Add Customer</button>
-      </form>
+      </form> */}
 
-      {/* Add Order Form */}
+      {/* Add Order Form
       <form onSubmit={handleAddOrder} className="mb-4">
         <h3>Add New Order</h3>
         <div className="mb-3">
@@ -230,9 +230,9 @@ const Salesman = () => {
           />
         </div>
         <button type="submit" className="btn btn-primary">Add Order</button>
-      </form>
+      </form> */}
 
-      {/* Orders Table */}
+     
       <h3>Order List</h3>
       <table className="table table-striped">
         <thead>
@@ -272,7 +272,7 @@ const Salesman = () => {
         </tbody>
       </table>
 
-      {/* Update Order Form (Only if editing an order) */}
+      {/* Update Order Form */}
       {editOrder && (
         <form onSubmit={handleUpdateOrder} className="mb-4">
           <h3>Update Order</h3>
@@ -308,6 +308,20 @@ const Salesman = () => {
               onChange={(e) => handleInputChange(e, true)}
               required
             />
+          </div>
+          <div className="mb-3">
+            <select
+              className="form-select"
+              name="status"
+              value={editOrder.status}
+              onChange={(e) => handleInputChange(e, true)}
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="canceled">Canceled</option>
+            </select>
           </div>
           <button type="submit" className="btn btn-warning">Update Order</button>
         </form>

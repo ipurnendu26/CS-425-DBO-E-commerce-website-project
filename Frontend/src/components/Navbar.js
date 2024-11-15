@@ -80,9 +80,6 @@ const Navbar = () => {
               <li className="nav-item">
             <Link className="nav-link" to="/customer">Home</Link>
           </li>
-              <li className="nav-item">
-            <Link className="nav-link" to="/customer-service">Customer Service</Link>
-          </li>
           </>
           )}
           {userRole === 'storeManager' && (
@@ -130,11 +127,11 @@ const Navbar = () => {
               Products
             </a>
             <ul className="dropdown-menu">
-              <li><Link className="dropdown-item" to="/products/doorbells">Advanced Smart Doorbells</Link></li>
-              <li><Link className="dropdown-item" to="/products/doorlocks">Smart Doorlocks</Link></li>
-              <li><Link className="dropdown-item" to="/products/speakers">Smart Speakers</Link></li>
-              <li><Link className="dropdown-item" to="/products/lightings">Smart Lightings</Link></li>
-              <li><Link className="dropdown-item" to="/products/thermostats">Video Doorbell Pro</Link></li>
+              <li><Link className="dropdown-item" to="/products/smartphones">Smartphones</Link></li>
+              <li><Link className="dropdown-item" to="/products/laptops">Laptops</Link></li>
+              <li><Link className="dropdown-item" to="/products/homegadgets">Home Gadgets</Link></li>
+              <li><Link className="dropdown-item" to="/products/wearables">Wearables</Link></li>
+              <li><Link className="dropdown-item" to="/products/accessories">Accessories</Link></li>
             </ul>
           </li>
 

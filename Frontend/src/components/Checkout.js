@@ -69,9 +69,11 @@ const Checkout = ({ cartItems }) => {
 
     const orderDetails = {
       userId,
+      name, // Include the name field
       totalPrice: totalPrice.toFixed(2),
       deliveryMethod,
-      storeLocation: deliveryMethod === 'inStorePickup' ? storeLocation : null,
+      // storeLocation: deliveryMethod === 'inStorePickup' ? storeLocation : null,
+      storeLocation: deliveryMethod === 'inStorePickup' ? storeLocation : `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
       deliveryDate: formattedDeliveryDate,
       cartItems: updatedCartItems, // Pass updated cartItems with product_id and quantity
       address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,

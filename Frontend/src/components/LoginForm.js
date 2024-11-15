@@ -30,9 +30,8 @@ const LoginForm = () => {
           // Navigate to the appropriate dashboard based on the user role
           if (userRole === 'storeManager') {
             navigate('/store-manager');
-          } else if (userRole === 'salesman') {
-            navigate('/salesman');
-          } else {
+          } 
+          else {
             navigate('/customer');
           }
         } else {
@@ -80,7 +79,6 @@ const LoginForm = () => {
             required
           >
             <option value="customer">Customer</option>
-            <option value="salesman">Salesman</option>
             <option value="storeManager">Store Manager</option>
           </select>
         </div>

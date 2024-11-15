@@ -182,13 +182,13 @@ app.delete('/products/:id', (req, res) => {
 
 
 app.post('/place-order', (req, res) => {
-  const { userId, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
+  const { userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, cartItems, address, creditCard } = req.body;
 
   // Log the incoming request body to check for missing fields
   console.log('Request Body:', req.body);
 
   // Validate required fields
-  if (!userId || !totalPrice || !deliveryMethod || !cartItems || !address || !creditCard) {
+  if (!userId || !name || !totalPrice || !deliveryMethod || !cartItems || !address || !creditCard || (!storeLocation && deliveryMethod === 'inStorePickup')) {
       return res.status(400).json({ message: 'Missing required order information' });
   }
 
@@ -197,7 +197,7 @@ app.post('/place-order', (req, res) => {
 
   // Insert into the orders table
   const orderQuery = `
-      INSERT INTO orders (user_id, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
+      INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
       VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)
   `;
   
@@ -237,7 +237,8 @@ app.post('/place-order', (req, res) => {
             VALUES ?
         `;
         const orderItems = [[
-            userId,  // Assuming userId as userName, adjust this based on your schema
+            // userId, // Assuming userId as userName, adjust this based on your schema
+            name,   
             item.name,
             item.price,
             address,
@@ -365,12 +366,12 @@ app.get('/orders', (req, res) => {
   });
 });
 
-// API: Update an order
+// API: Update an order, including status
 app.put('/orders/:id', (req, res) => {
   const { id } = req.params;
-  const { total_price, delivery_method, store_location, delivery_date } = req.body;
-  const query = 'UPDATE orders SET total_price = ?, delivery_method = ?, store_location = ?, delivery_date = ? WHERE id = ?';
-  db.query(query, [total_price, delivery_method, store_location, delivery_date, id], (err, result) => {
+  const { total_price, delivery_method, store_location, delivery_date, status } = req.body;
+  const query = 'UPDATE orders SET total_price = ?, delivery_method = ?, store_location = ?, delivery_date = ?, status = ? WHERE id = ?';
+  db.query(query, [total_price, delivery_method, store_location, delivery_date, status, id], (err, result) => {
     if (err) {
       console.error('Error updating order:', err);
       return res.status(500).json({ message: 'Error updating order' });
@@ -378,6 +379,7 @@ app.put('/orders/:id', (req, res) => {
     res.status(200).json({ message: 'Order updated successfully' });
   });
 });
+
 
 // API: Delete an order
 app.delete('/orders/:id', (req, res) => {

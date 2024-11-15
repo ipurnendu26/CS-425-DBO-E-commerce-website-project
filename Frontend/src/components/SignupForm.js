@@ -85,7 +85,6 @@ const SignupForm = () => {
                   <label>Select Role</label>
                   <select className="form-control" value={role} onChange={(e) => setRole(e.target.value)} required>
                     <option value="customer">Customer</option>
-                    <option value="salesman">Salesman</option>
                     <option value="storeManager">Store Manager</option>
                   </select>
                 </div>
