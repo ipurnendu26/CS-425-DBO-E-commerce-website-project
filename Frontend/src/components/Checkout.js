@@ -92,7 +92,7 @@ const Checkout = ({ cartItems }) => {
       .then((data) => {
         if (data.message === 'Order placed successfully') {
           alert(`Order confirmed! Your confirmation number is ${confirmationNum}`);
-          navigate('/');
+          navigate('/past-orders');
         } else {
           alert(`Error: ${data.message}`);
         }
