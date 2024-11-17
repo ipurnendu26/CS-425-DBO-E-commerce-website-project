@@ -5,7 +5,7 @@ import '../Css/Customer.css';
 const CustomerDashboard = ({ products, addToCart }) => {
   return (
     <div className="container">
-      <h1>Welcome to Customer Dashboard</h1>
+      <h1>Welcome to PLUG POINT</h1>
       <ProductList products={products} addToCart={addToCart} />
     </div>
   );

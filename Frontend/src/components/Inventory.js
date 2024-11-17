@@ -73,7 +73,7 @@ const Inventory = () => {
       </section>
 
       {/* Discounted products */}
-      <section>
+      {/* <section>
         <h2>Discounted Products</h2>
         <table className="styled-table">
           <thead>
@@ -93,10 +93,10 @@ const Inventory = () => {
             ))}
           </tbody>
         </table>
-      </section>
+      </section> */}
 
       {/* Rebate products */}
-      <section>
+      {/* <section>
         <h2>Rebate Items</h2>
         <table className="styled-table">
           <thead>
@@ -116,7 +116,7 @@ const Inventory = () => {
             ))}
           </tbody>
         </table>
-      </section>
+      </section> */}
     </div>
   );
 };
