@@ -139,6 +139,7 @@ CREATE TABLE orders (
     product_id INT NOT NULL,
     quantity INT NOT NULL,
     store_id INT
+    name VARCHAR(50)
 );
 
 CREATE TABLE store_locations (
