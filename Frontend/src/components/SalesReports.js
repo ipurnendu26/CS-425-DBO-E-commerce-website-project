@@ -112,22 +112,6 @@ const SalesReport = () => {
         setError("Failed to fetch customer segmentation data");
       }
     };
-
-    // const fetchCrossSellData = async () => {
-    //   setIsLoading(true);
-    //   try {
-    //     const response = await axios.get(
-    //       "http://localhost:3001/analytics/product-cross-sell"
-    //     );
-    //     setCrossSellData(response.data);
-    //   } catch (err) {
-    //     console.error("Error fetching cross-sell data:", err);
-    //     setError("Failed to fetch cross-sell data");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
     const fetchLifetimeValueData = async () => {
       try {
         const response = await axios.get(
@@ -165,7 +149,6 @@ const SalesReport = () => {
 
     fetchSeasonalSalesData();
     fetchLifetimeValueData();
-    // fetchCrossSellData();
     fetchSegmentationData();
     fetchRetentionRate();
 
@@ -186,6 +169,7 @@ const SalesReport = () => {
     return Math.max(...chartData.map((item) => item.total_sales)) + 500; // Adding buffer for readability
   };
 
+  //Calculate Retention Rate of customers
   const formatRetentionRate = (rate) => {
     return rate !== null && !isNaN(rate)
       ? `${parseFloat(rate).toFixed(2)}%`
@@ -263,6 +247,7 @@ const SalesReport = () => {
       <br></br>
       <br></br>
 
+      {/* Top 5 Customers with highest sales  */}
       <section>
         <h2 className="main-title">Top 5 Customers</h2>
         <table className="styled-table">
@@ -287,7 +272,7 @@ const SalesReport = () => {
 
       <br></br>
       <br></br>
-
+{/* Inactive customers in the last 30 days  */}
       <section>
         <h2>Inactive Customers (Last 30 Days)</h2>
         {inactiveCustomers.length === 0 ? (
@@ -314,7 +299,7 @@ const SalesReport = () => {
 
       <br></br>
       <br></br>
-
+{/* Customer Retention in every 2 days  */}
       <section>
         <h1>Customer Retention Rate Every 2 Days</h1>
         {error && <p className="error">{error}</p>}
@@ -345,6 +330,8 @@ const SalesReport = () => {
       <br></br>
       <br></br>
 
+
+{/* Two day average sales  */}
       <section>
         <h2>2-Day Average Sales</h2>
         <p className="average-sales">
@@ -355,6 +342,7 @@ const SalesReport = () => {
       <br></br>
       <br></br>
 
+{/* Customer Segmentation which has customer count and average spend  */}
       <section>
         <h1 className="main-title">Customer Segmentation</h1>
         {error && <p className="error">{error}</p>}
@@ -385,36 +373,8 @@ const SalesReport = () => {
       <br></br>
       <br></br>
 
-      {/* <section>
-        <h2>Product Cross-Sell Analysis</h2>
-        {isLoading ? (
-          <p>Loading cross-sell data...</p> // Display this while the data is being fetched
-        ) : error ? (
-          <p className="error">{error}</p> // Display this if there's an error
-        ) : crossSellData.length > 0 ? (
-          <table className="styled-table">
-            <thead>
-              <tr>
-                <th>Product 1</th>
-                <th>Product 2</th>
-                <th>Co-Occurrence</th>
-              </tr>
-            </thead>
-            <tbody>
-              {crossSellData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.Product1}</td>
-                  <td>{item.Product2}</td>
-                  <td>{item.CoOccurrence}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No cross-sell data available.</p>
-        )}
-      </section> */}
 
+{/* Customer Lifetime value predicting how much customer is going to spend in their lifetime  */}
       <section>
   <h1>Customer Lifetime Value</h1>
   {error && <p className="error">{error}</p>}
@@ -456,8 +416,11 @@ const SalesReport = () => {
   )}
 </section>
 
+<br></br>
+<br></br>
 
 
+{/* Seasonal sales analysis of the customer  */}
 <section>
   <h2>Seasonal Sales Analysis</h2>
   {error && <p className="error">{error}</p>}
@@ -487,8 +450,10 @@ const SalesReport = () => {
   )}
 </section>
 
+<br></br>
+<br></br>
 
-
+{/* Customer Purchase frequency distribution having average orders  */}
 <section>
   <h2>Customer Purchase Frequency Distribution</h2>
   {error && <p className="error">{error}</p>}

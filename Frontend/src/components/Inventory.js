@@ -71,52 +71,6 @@ const Inventory = () => {
           </BarChart>
         </ResponsiveContainer>
       </section>
-
-      {/* Discounted products */}
-      {/* <section>
-        <h2>Discounted Products</h2>
-        <table className="styled-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price ($)</th>
-              <th>Discount ($)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {discountedProducts.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.price}</td>
-                <td>{product.discount}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section> */}
-
-      {/* Rebate products */}
-      {/* <section>
-        <h2>Rebate Items</h2>
-        <table className="styled-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price ($)</th>
-              <th>Rebate ($)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rebateItems.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.price}</td>
-                <td>{product.rebate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section> */}
     </div>
   );
 };

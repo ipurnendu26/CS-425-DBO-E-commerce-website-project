@@ -285,28 +285,6 @@ app.get('/past-orders/:userId', (req, res) => {
   });
 });
 
-// app.delete('/cancel-order/:orderId', (req, res) => {
-//   const orderId = req.params.orderId;
-//   console.log('Deleting order with ID:', orderId); // Log the orderId for debugging
-
-//   const query = `
-//     DELETE FROM orders
-//     WHERE id = ?
-//   `;
-
-//   db.query(query, [orderId], (err, result) => {
-//     if (err) {
-//       console.error('Error deleting order:', err);
-//       return res.status(500).json({ message: 'Error deleting order' });
-//     }
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ message: 'Order not found' });
-//     }
-
-//     res.status(200).json({ message: 'Order deleted successfully' });
-//   });
-// });
 app.delete('/cancel-order/:orderId', (req, res) => {
   const orderId = req.params.orderId;
 
@@ -561,7 +539,7 @@ app.get('/inventory/products/rebates', (req, res) => {
   });
 });
 
-// API: Fetch product sales (name, price, total sales)
+// 5. API: Fetch product sales (name, price, total sales)
 app.get('/sales-report/products-sold', (req, res) => {
   const query = `
     SELECT p.name, p.price, COUNT(o.id) AS items_sold, 
@@ -582,7 +560,7 @@ app.get('/sales-report/products-sold', (req, res) => {
 
 
 
-// API: Fetch product sales chart (product names and total sales)
+// 6. API: Fetch product sales chart (product names and total sales)
 app.get('/sales-report/products-sales-chart', (req, res) => {
   const query = `
     SELECT p.name, SUM(o.total_price) AS total_sales
@@ -600,7 +578,7 @@ app.get('/sales-report/products-sales-chart', (req, res) => {
   });
 });
 
-// API: Fetch total daily sales transactions
+// 7. API: Fetch total daily sales transactions
 app.get('/sales-report/daily-sales', (req, res) => {
   const query = `
     SELECT DATE(o.order_date) AS date, SUM(o.total_price) AS total_sales
@@ -618,7 +596,7 @@ app.get('/sales-report/daily-sales', (req, res) => {
   });
 });
 
-// API: Get top 5 customers by total purchase amount
+// 8. API: Get top 5 customers by total purchase amount
 app.get('/sales-report/top-customers', (req, res) => {
   const query = `
     SELECT u.name AS customer_name, u.email, SUM(o.total_price) AS total_spent
@@ -639,7 +617,7 @@ app.get('/sales-report/top-customers', (req, res) => {
 });
 
 
-// API: Get popular products by category
+// 9. API: Get popular products by category
 app.get('/trending/popular-products-by-category', (req, res) => {
   const query = `
     SELECT 
@@ -663,7 +641,7 @@ app.get('/trending/popular-products-by-category', (req, res) => {
 });
 
 
-// API: Get customers who haven't placed an order in the last 30 days
+// 10. API: Get customers who haven't placed an order in the last 30 days
 app.get('/customers/inactive', (req, res) => {
   const query = `
     SELECT u.name AS customer_name, u.email
@@ -683,7 +661,7 @@ app.get('/customers/inactive', (req, res) => {
   });
 });
 
-//API: To retention data of 2 interval days
+//  11. API: To retention data of 2 interval days
 app.get('/sales-report/customer-retention', (req, res) => {
   const query = `
     WITH CurrentPeriodCustomers AS (
@@ -718,7 +696,7 @@ app.get('/sales-report/customer-retention', (req, res) => {
   });
 });
 
-//API: 2 days average sale
+// 12. API: 2 days average sale
 app.get('/sales-report/average-sales', (req, res) => {
   const query = `
     SELECT 
@@ -739,7 +717,7 @@ app.get('/sales-report/average-sales', (req, res) => {
 });
 
 
-// API: Customer Segmentation analysis
+// 13. API: Customer Segmentation analysis
 app.get('/analytics/customer-segmentation', (req, res) => {
   const query = `
     SELECT 
@@ -770,7 +748,7 @@ app.get('/analytics/customer-segmentation', (req, res) => {
 });
 
 
-// API: Product Cross-Sell Analysis
+// 14. API: Product Cross-Sell Analysis
 app.get('/analytics/product-cross-sell', (req, res) => {
   console.log('Cross-sell endpoint hit');
   const query = `
@@ -798,7 +776,7 @@ app.get('/analytics/product-cross-sell', (req, res) => {
 });
 
 
-// API: Customer Lifetime Value Calculation
+// 15. API: Customer Lifetime Value Calculation
 app.get('/analytics/customer-lifetime-value', (req, res) => {
   const query = `
     SELECT 
@@ -828,7 +806,7 @@ LIMIT 10;
 });
 
 
-// API: Seasonal Sales Analysis
+// 16. API: Seasonal Sales Analysis
 app.get('/analytics/seasonal-sales-analysis', (req, res) => {
   const query = `
     SELECT 
@@ -851,7 +829,7 @@ app.get('/analytics/seasonal-sales-analysis', (req, res) => {
 });
 
 
-// API: Customer Purchase Frequency Distribution
+// 17. API: Customer Purchase Frequency Distribution
 app.get('/analytics/purchase-frequency', (req, res) => {
   const query = `
     WITH PurchaseFrequency AS (
@@ -884,7 +862,7 @@ app.get('/analytics/purchase-frequency', (req, res) => {
 });
 
 
-// Create an endpoint for auto-completion search
+// 18. Create an endpoint for auto-completion search
 app.get('/autocomplete', (req, res) => {
   const searchTerm = req.query.q;  // Get the search term from the query
 
