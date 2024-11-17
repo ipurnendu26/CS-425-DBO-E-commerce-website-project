@@ -80,6 +80,9 @@ const Navbar = () => {
               <li className="nav-item">
             <Link className="nav-link" to="/customer">Home</Link>
           </li>
+          <li className="nav-item">
+              <Link className="nav-link" to="/past-orders">Order History</Link>
+            </li>
           </>
           )}
           {userRole === 'storeManager' && (
@@ -87,9 +90,9 @@ const Navbar = () => {
             <li className="nav-item">
             <Link className="nav-link" to="/store-manager">Home</Link>
             </li>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link className="nav-link" to="/store-manager">Manage Products</Link>
-              </li>
+              </li> */}
               <li className="nav-item">
                 <Link className="nav-link" to="/inventory">Inventory</Link>
               </li>
@@ -99,13 +102,14 @@ const Navbar = () => {
               <li className="nav-item">
             <Link className="nav-link" to="/trending">Trending</Link>
           </li>
-          <li className="nav-item">
+          {/* <li className="nav-item">
             <Link className="nav-link" to="/customer-service">Customer Service</Link>
-          </li>
+          </li> */}
+          
             </>
           )}
 
-          {userRole === 'salesman' && (
+          {/* {userRole === 'salesman' && (
             <>
             <li className="nav-item">
               <Link className="nav-link" to="/salesman">Home</Link>
@@ -120,7 +124,7 @@ const Navbar = () => {
             <Link className="nav-link" to="/customer-service">Customer Service</Link>
           </li>
             </>
-          )}
+          )} */}
 
           <li className="nav-item dropdown">
             <a className="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

@@ -13,7 +13,7 @@ const multer = require('multer');
 const axios = require('axios');  // Add this line to import Axios
 require('dotenv').config(); // Load environment variables from .env
 
-
+const todayDate = new Date().toISOString().split('T')[0];
 
 const { v4: uuidv4 } = require('uuid'); // Import the uuid library for generating unique IDs
 
@@ -193,21 +193,30 @@ app.post('/place-order', (req, res) => {
   console.log('Validation passed, proceeding with database operations');
 
   // Insert into the orders table
+  // const orderQuery = `
+  //     INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
+  //     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+  // `;
   const orderQuery = `
-      INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity)
-      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)
-  `;
+    INSERT INTO orders (user_id, name, total_price, delivery_method, store_location, status, delivery_date, product_id, quantity, order_date)
+    VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)
+`;
   
   cartItems.forEach((item) => {
     // Log each item to track the insertion process
     console.log('Inserting order for product ID:', item.product_id);
 
     // Insert each cart item as a separate order with its respective product_id and quantity
-    db.query(orderQuery, [userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, item.product_id, item.quantity], (err, result) => {
-        if (err) {
-            console.error('Error inserting into orders table:', err);  // Log the specific error
-            return res.status(500).json({ message: 'Error placing order', error: err.message });
-        }
+    // db.query(orderQuery, [userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, item.product_id, item.quantity], (err, result) => {
+    //     if (err) {
+    //         console.error('Error inserting into orders table:', err);  // Log the specific error
+    //         return res.status(500).json({ message: 'Error placing order', error: err.message });
+    //     }
+    db.query(orderQuery, [userId, name, totalPrice, deliveryMethod, storeLocation, deliveryDate, item.product_id, item.quantity, todayDate], (err, result) => {
+      if (err) {
+          console.error('Error inserting into orders table:', err);
+          return res.status(500).json({ message: 'Error placing order', error: err.message });
+      }
 
         const orderId = result.insertId;
         console.log('Order inserted with ID:', orderId);
@@ -571,6 +580,8 @@ app.get('/sales-report/products-sold', (req, res) => {
   });
 });
 
+
+
 // API: Fetch product sales chart (product names and total sales)
 app.get('/sales-report/products-sales-chart', (req, res) => {
   const query = `
@@ -606,6 +617,112 @@ app.get('/sales-report/daily-sales', (req, res) => {
     res.status(200).json(results);
   });
 });
+
+// API: Get top 5 customers by total purchase amount
+app.get('/sales-report/top-customers', (req, res) => {
+  const query = `
+    SELECT u.name AS customer_name, u.email, SUM(o.total_price) AS total_spent
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    GROUP BY u.id
+    ORDER BY total_spent DESC
+    LIMIT 5;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching top customers:', err);
+      return res.status(500).json({ message: 'Error fetching top customers', error: err });
+    }
+    return res.status(200).json(results);
+  });
+});
+
+
+// API: Get popular products by category
+app.get('/trending/popular-products-by-category', (req, res) => {
+  const query = `
+    SELECT 
+      p.category AS category_name,
+      p.name AS product_name,
+      COUNT(o.id) AS items_sold,
+      SUM(o.total_price) AS total_revenue
+    FROM orders o
+    JOIN products p ON o.product_id = p.id
+    GROUP BY p.category, p.name
+    ORDER BY p.category ASC, items_sold DESC;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching popular products by category:', err);
+      return res.status(500).json({ message: 'Error fetching popular products by category', error: err.message });
+    }
+    res.status(200).json(results);
+  });
+});
+
+
+// API: Get customers who haven't placed an order in the last 30 days
+app.get('/customers/inactive', (req, res) => {
+  const query = `
+    SELECT u.name AS customer_name, u.email
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.user_id 
+          AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    WHERE o.id IS NULL
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching inactive customers:', err);
+      return res.status(500).json({ message: 'Error fetching inactive customers', error: err.message });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+//retention data 
+app.get('/sales-report/customer-retention', (req, res) => {
+  const query = `
+    WITH CurrentPeriodCustomers AS (
+      SELECT DISTINCT user_id
+      FROM orders
+      WHERE order_date >= CURDATE() - INTERVAL 2 DAY
+    ),
+    PreviousPeriodCustomers AS (
+      SELECT DISTINCT user_id
+      FROM orders
+      WHERE order_date >= CURDATE() - INTERVAL 4 DAY
+        AND order_date < CURDATE() - INTERVAL 2 DAY
+    )
+    SELECT 
+      COUNT(DISTINCT cmc.user_id) AS RetainedCustomers,
+      COUNT(DISTINCT pmc.user_id) AS PreviousPeriodCustomers,
+      (COUNT(DISTINCT cmc.user_id) / COUNT(DISTINCT pmc.user_id)) * 100 AS RetentionRate,
+      GROUP_CONCAT(DISTINCT u.name) AS RetainedCustomerNames
+    FROM PreviousPeriodCustomers pmc
+    LEFT JOIN CurrentPeriodCustomers cmc ON pmc.user_id = cmc.user_id
+    LEFT JOIN users u ON cmc.user_id = u.id;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error calculating customer retention rate:', err);
+      return res.status(500).json({ message: 'Error calculating customer retention rate', error: err.message });
+    }
+
+    console.log('Retention rate query results:', results); // Log results for debugging
+    res.status(200).json(results[0] || {}); // Return the first result or an empty object
+  });
+});
+
+
+
+
+
+
 
 // Create an endpoint for auto-completion search
 app.get('/autocomplete', (req, res) => {
