@@ -246,11 +246,11 @@ const StoreManager = () => {
           onChange={handleInputChange}
           required
         >
-          <option value="smartphones">Smart Phones</option>
-            <option value="laptops">Laptops</option>
-            <option value="homegadgets">Home Gadgets</option>
-            <option value="wearables">Wearables</option>
-            <option value="accessories">Accessories</option>
+          <option value="Smartphones">Smart Phones</option>
+            <option value="Laptops">Laptops</option>
+            <option value="Home Gadgets">Home Gadgets</option>
+            <option value="Wearables">Wearables</option>
+            <option value="Accessories">Accessories</option>
         </select>
         <textarea
           name="accessories"
@@ -322,11 +322,11 @@ const StoreManager = () => {
             onChange={(e) => handleInputChange(e, true)}
             required
           >
-            <option value="smartphones">Smart Phones</option>
-            <option value="laptops">Laptops</option>
-            <option value="homegadgets">Home Gadgets</option>
-            <option value="wearables">Wearables</option>
-            <option value="accessories">Accessories</option>
+            <option value="Smartphones">Smart Phones</option>
+            <option value="Laptops">Laptops</option>
+            <option value="Home Gadgets">Home Gadgets</option>
+            <option value="Wearables">Wearables</option>
+            <option value="Accessories">Accessories</option>
           </select>
           <textarea
             name="accessories"
