@@ -1,29 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Checkout = ({ cartItems }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [address, setAddress] = useState({
-    street: '',
-    city: '',
-    state: '',
-    zipCode: ''
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
   });
-  const [creditCard, setCreditCard] = useState('');
-  const [deliveryMethod, setDeliveryMethod] = useState('homeDelivery');
-  const [storeLocation, setStoreLocation] = useState('');
+  const [creditCard, setCreditCard] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState("homeDelivery");
+  const [storeLocation, setStoreLocation] = useState("");
   const [storeLocations, setStoreLocations] = useState([]);
-  const [confirmationNumber, setConfirmationNumber] = useState('');
-  const [pickupDate, setPickupDate] = useState('');
+  const [confirmationNumber, setConfirmationNumber] = useState("");
+  const [pickupDate, setPickupDate] = useState("");
 
   const navigate = useNavigate();
 
   // Fetch store locations from the API
   useEffect(() => {
-    fetch('http://localhost:3001/store-locations') // Adjust port as necessary
-      .then(response => response.json())
-      .then(data => setStoreLocations(data))
-      .catch(error => console.error('Error fetching store locations:', error));
+    fetch("http://localhost:3001/store-locations") // Adjust port as necessary
+      .then((response) => response.json())
+      .then((data) => setStoreLocations(data))
+      .catch((error) =>
+        console.error("Error fetching store locations:", error)
+      );
   }, []);
 
   const generateConfirmationNumber = () => {
@@ -36,7 +38,10 @@ const Checkout = ({ cartItems }) => {
     return deliveryDate.toDateString();
   };
 
-  const subtotal = cartItems.reduce((total, item) => total + Number(item.price), 0);
+  const subtotal = cartItems.reduce(
+    (total, item) => total + Number(item.price),
+    0
+  );
   const taxRate = 0.12;
   const estimatedTax = subtotal * taxRate;
   const totalPrice = subtotal + estimatedTax;
@@ -44,27 +49,36 @@ const Checkout = ({ cartItems }) => {
   const handleCheckout = (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
-      alert('Your cart is empty!');
+      alert("Your cart is empty!");
       return;
     }
 
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem("userId");
     if (!userId) {
-      alert('You must be logged in to place an order.');
-      navigate('/login');
+      alert("You must be logged in to place an order.");
+      navigate("/login");
+      return;
+    }
+
+    // Validate credit card input
+    const creditCardRegex = /^[0-9]+$/;
+    if (!creditCardRegex.test(creditCard)) {
+      alert("Credit card number must contain only numbers.");
       return;
     }
 
     const confirmationNum = generateConfirmationNumber();
     const deliveryDate = generateDeliveryDate();
-    const formattedDeliveryDate = new Date(deliveryDate).toISOString().split('T')[0];
+    const formattedDeliveryDate = new Date(deliveryDate)
+      .toISOString()
+      .split("T")[0];
 
     // Update cartItems to include product_id and quantity
-    const updatedCartItems = cartItems.map(item => ({
-      product_id: item.id,  // Assuming 'id' is the product_id from the cart item
+    const updatedCartItems = cartItems.map((item) => ({
+      product_id: item.id, // Assuming 'id' is the product_id from the cart item
       name: item.name,
       price: item.price,
-      quantity: item.quantity || 1  // Default quantity to 1 if not provided
+      quantity: item.quantity || 1, // Default quantity to 1 if not provided
     }));
 
     const orderDetails = {
@@ -73,33 +87,38 @@ const Checkout = ({ cartItems }) => {
       totalPrice: totalPrice.toFixed(2),
       deliveryMethod,
       // storeLocation: deliveryMethod === 'inStorePickup' ? storeLocation : null,
-      storeLocation: deliveryMethod === 'inStorePickup' ? storeLocation : `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
+      storeLocation:
+        deliveryMethod === "inStorePickup"
+          ? storeLocation
+          : `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
       deliveryDate: formattedDeliveryDate,
       cartItems: updatedCartItems, // Pass updated cartItems with product_id and quantity
       address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
-      creditCard
+      creditCard,
     };
 
     // Send order to the server
-    fetch('http://localhost:3001/place-order', {
-      method: 'POST',
+    fetch("http://localhost:3001/place-order", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(orderDetails),
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.message === 'Order placed successfully') {
-          alert(`Order confirmed! Your confirmation number is ${confirmationNum}`);
-          navigate('/past-orders');
+        if (data.message === "Order placed successfully") {
+          alert(
+            `Order confirmed! Your confirmation number is ${confirmationNum}`
+          );
+          navigate("/past-orders");
         } else {
           alert(`Error: ${data.message}`);
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
-        alert('Error placing order');
+        console.error("Error:", error);
+        alert("Error placing order");
       });
   };
 
@@ -109,14 +128,18 @@ const Checkout = ({ cartItems }) => {
 
       {/* Display cart items */}
       <div className="row mb-4">
-        {cartItems.map(item => (
+        {cartItems.map((item) => (
           <div className="col-md-4 mb-4" key={item.id}>
             <div className="card h-100">
               <div className="card-body">
                 <h5 className="card-title">{item.name}</h5>
                 <p className="card-text">{item.description}</p>
-                <p className="card-text"><strong>Price:</strong> ${item.price}</p>
-                <p className="card-text"><strong>Accessories:</strong> {item.accessories}</p>
+                <p className="card-text">
+                  <strong>Price:</strong> ${item.price}
+                </p>
+                <p className="card-text">
+                  <strong>Accessories:</strong> {item.accessories}
+                </p>
               </div>
             </div>
           </div>
@@ -148,7 +171,9 @@ const Checkout = ({ cartItems }) => {
       <form onSubmit={handleCheckout} className="mt-4">
         {/* Customer Info */}
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Full Name</label>
+          <label htmlFor="name" className="form-label">
+            Full Name
+          </label>
           <input
             type="text"
             className="form-control"
@@ -161,7 +186,9 @@ const Checkout = ({ cartItems }) => {
 
         {/* Address Info */}
         <div className="mb-3">
-          <label htmlFor="street" className="form-label">Street</label>
+          <label htmlFor="street" className="form-label">
+            Street
+          </label>
           <input
             type="text"
             className="form-control"
@@ -173,7 +200,9 @@ const Checkout = ({ cartItems }) => {
         </div>
         <div className="row mb-3">
           <div className="col-md-6">
-            <label htmlFor="city" className="form-label">City</label>
+            <label htmlFor="city" className="form-label">
+              City
+            </label>
             <input
               type="text"
               className="form-control"
@@ -184,24 +213,32 @@ const Checkout = ({ cartItems }) => {
             />
           </div>
           <div className="col-md-3">
-            <label htmlFor="state" className="form-label">State</label>
+            <label htmlFor="state" className="form-label">
+              State
+            </label>
             <input
               type="text"
               className="form-control"
               id="state"
               value={address.state}
-              onChange={(e) => setAddress({ ...address, state: e.target.value })}
+              onChange={(e) =>
+                setAddress({ ...address, state: e.target.value })
+              }
               required
             />
           </div>
           <div className="col-md-3">
-            <label htmlFor="zipCode" className="form-label">Zip Code</label>
+            <label htmlFor="zipCode" className="form-label">
+              Zip Code
+            </label>
             <input
               type="text"
               className="form-control"
               id="zipCode"
               value={address.zipCode}
-              onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+              onChange={(e) =>
+                setAddress({ ...address, zipCode: e.target.value })
+              }
               required
             />
           </div>
@@ -209,13 +246,23 @@ const Checkout = ({ cartItems }) => {
 
         {/* Credit Card Info */}
         <div className="mb-3">
-          <label htmlFor="creditCard" className="form-label">Credit Card</label>
+          <label htmlFor="creditCard" className="form-label">
+            Credit Card
+          </label>
           <input
             type="text"
             className="form-control"
             id="creditCard"
             value={creditCard}
-            onChange={(e) => setCreditCard(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^[0-9]*$/.test(value)) {
+                // Allow only numeric characters
+                setCreditCard(value);
+              } else {
+                alert("Credit card number must contain only numbers.");
+              }
+            }}
             required
           />
         </div>
@@ -229,10 +276,12 @@ const Checkout = ({ cartItems }) => {
               id="homeDelivery"
               name="deliveryMethod"
               value="homeDelivery"
-              checked={deliveryMethod === 'homeDelivery'}
+              checked={deliveryMethod === "homeDelivery"}
               onChange={(e) => setDeliveryMethod(e.target.value)}
             />
-            <label htmlFor="homeDelivery" className="ms-2">Home Delivery</label>
+            <label htmlFor="homeDelivery" className="ms-2">
+              Home Delivery
+            </label>
           </div>
           <div>
             <input
@@ -240,17 +289,21 @@ const Checkout = ({ cartItems }) => {
               id="inStorePickup"
               name="deliveryMethod"
               value="inStorePickup"
-              checked={deliveryMethod === 'inStorePickup'}
+              checked={deliveryMethod === "inStorePickup"}
               onChange={(e) => setDeliveryMethod(e.target.value)}
             />
-            <label htmlFor="inStorePickup" className="ms-2">In-Store Pickup</label>
+            <label htmlFor="inStorePickup" className="ms-2">
+              In-Store Pickup
+            </label>
           </div>
         </div>
 
         {/* Store Locations Dropdown (for In-Store Pickup) */}
-        {deliveryMethod === 'inStorePickup' && (
+        {deliveryMethod === "inStorePickup" && (
           <div className="mb-3">
-            <label htmlFor="storeLocation" className="form-label">Select Store Location</label>
+            <label htmlFor="storeLocation" className="form-label">
+              Select Store Location
+            </label>
             <select
               className="form-control"
               id="storeLocation"

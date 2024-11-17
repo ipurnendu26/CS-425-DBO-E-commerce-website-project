@@ -683,7 +683,7 @@ app.get('/customers/inactive', (req, res) => {
   });
 });
 
-//retention data 
+//API: To retention data of 2 interval days
 app.get('/sales-report/customer-retention', (req, res) => {
   const query = `
     WITH CurrentPeriodCustomers AS (
@@ -718,10 +718,170 @@ app.get('/sales-report/customer-retention', (req, res) => {
   });
 });
 
+//API: 2 days average sale
+app.get('/sales-report/average-sales', (req, res) => {
+  const query = `
+    SELECT 
+      ROUND(SUM(total_price) / 2, 2) AS average_sales
+    FROM orders
+    WHERE order_date >= CURDATE() - INTERVAL 2 DAY;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching average sales:', err);
+      return res.status(500).json({ message: 'Error fetching average sales', error: err.message });
+    }
+
+    console.log('2-Day Average Sales:', results[0]);
+    res.status(200).json(results[0] || { average_sales: 0 });
+  });
+});
 
 
+// API: Customer Segmentation analysis
+app.get('/analytics/customer-segmentation', (req, res) => {
+  const query = `
+    SELECT 
+      CASE 
+        WHEN TotalSpent < 1500 THEN 'Low Spender'
+        WHEN TotalSpent BETWEEN 1500 AND 3500 THEN 'Medium Spender'
+        ELSE 'High Spender'
+      END AS CustomerSegment,
+      COUNT(*) AS CustomerCount,
+      AVG(TotalSpent) AS AvgSpend
+    FROM (
+      SELECT u.id AS CustomerID, u.name AS CustomerName, SUM(o.total_price) AS TotalSpent
+      FROM users u
+      JOIN orders o ON u.id = o.user_id
+      GROUP BY u.id, u.name
+    ) AS CustomerSpend
+    GROUP BY CustomerSegment WITH ROLLUP;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching customer segmentation data:', err);
+      return res.status(500).json({ message: 'Error fetching customer segmentation data', error: err.message });
+    }
+    console.log('Customer Segmentation Query Results:', results); // Log the results
+    res.status(200).json(results);
+  });
+});
 
 
+// API: Product Cross-Sell Analysis
+app.get('/analytics/product-cross-sell', (req, res) => {
+  console.log('Cross-sell endpoint hit');
+  const query = `
+    SELECT 
+        p1.name AS Product1,
+        p2.name AS Product2,
+        COUNT(*) AS CoOccurrence
+    FROM orders o1
+    JOIN orders o2 ON o1.order_id = o2.order_id AND o1.product_id < o2.product_id
+    JOIN products p1 ON o1.product_id = p1.id
+    JOIN products p2 ON o2.product_id = p2.id
+    GROUP BY p1.name, p2.name, p1.id, p2.id
+    ORDER BY CoOccurrence DESC
+    LIMIT 10;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching cross-sell data:', err);
+      return res.status(500).json({ message: 'Error fetching cross-sell data', error: err.message });
+    }
+    console.log('Cross-Sell Analysis Results:', results);
+    res.status(200).json(results);
+  });
+});
+
+
+// API: Customer Lifetime Value Calculation
+app.get('/analytics/customer-lifetime-value', (req, res) => {
+  const query = `
+    SELECT 
+  u.id AS CustomerID,
+  u.name AS CustomerName,
+  COUNT(DISTINCT o.id) AS TotalOrders,
+  SUM(o.total_price) AS TotalSpent,
+  AVG(o.total_price) AS AvgOrderValue,
+  IFNULL(DATEDIFF(MAX(o.order_date), MIN(o.order_date)) / 365.0, 0) AS YearsActive,
+  IFNULL(SUM(o.total_price) / (DATEDIFF(MAX(o.order_date), MIN(o.order_date)) / 365.0), 0) AS AnnualValue
+FROM users u
+JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.name
+ORDER BY AnnualValue DESC
+LIMIT 10;
+
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching customer lifetime value data:', err);
+      return res.status(500).json({ message: 'Error fetching customer lifetime value data', error: err.message });
+    }
+    console.log('Customer Lifetime Value Results:', results); // Log the results
+    res.status(200).json(results);
+  });
+});
+
+
+// API: Seasonal Sales Analysis
+app.get('/analytics/seasonal-sales-analysis', (req, res) => {
+  const query = `
+    SELECT 
+      YEAR(order_date) AS Year,
+      QUARTER(order_date) AS Quarter,
+      SUM(total_price) AS Quarterly_Sales,
+      SUM(SUM(total_price)) OVER (PARTITION BY YEAR(order_date) ORDER BY QUARTER(order_date)) AS Cumulative_Yearly_Sales
+    FROM orders
+    GROUP BY Year, Quarter WITH ROLLUP;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching seasonal sales analysis data:', err);
+      return res.status(500).json({ message: 'Error fetching seasonal sales data', error: err.message });
+    }
+    console.log('Seasonal Sales Analysis Results:', results); // Log the results for debugging
+    res.status(200).json(results);
+  });
+});
+
+
+// API: Customer Purchase Frequency Distribution
+app.get('/analytics/purchase-frequency', (req, res) => {
+  const query = `
+    WITH PurchaseFrequency AS (
+      SELECT user_id, COUNT(DISTINCT id) AS OrderCount
+      FROM orders
+      GROUP BY user_id
+    )
+    SELECT 
+      CASE 
+        WHEN OrderCount = 1 THEN 'One-time'
+        WHEN OrderCount BETWEEN 2 AND 5 THEN '2-5 times'
+        WHEN OrderCount BETWEEN 6 AND 10 THEN '6-10 times'
+        ELSE 'More than 10 times'
+      END AS PurchaseFrequency,
+      COUNT(*) AS CustomerCount,
+      AVG(OrderCount) AS AvgOrders
+    FROM PurchaseFrequency
+    GROUP BY PurchaseFrequency
+    ORDER BY MIN(OrderCount);
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching purchase frequency data:', err);
+      return res.status(500).json({ message: 'Error fetching purchase frequency data', error: err.message });
+    }
+    console.log('Purchase Frequency Query Results:', results);
+    res.status(200).json(results);
+  });
+});
 
 
 // Create an endpoint for auto-completion search
