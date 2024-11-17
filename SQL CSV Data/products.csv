@@ -1,0 +1,21 @@
+"id";"name";"price";"description";"category";"accessories";"image";"discount";"rebate";"warranty";"stock"
+1;"DJI Mini 3 Pro Drone";2000.0;"A convertible laptop with top-notch security and style.";"Accessories";"camera";"https://example.com/images/Smartphone-7942.jpg";10;30;"1 year";5
+2;"Logitech G915 Wireless Keyboard";1200.0;"A compact smart speaker with Alexa and improved sound quality.";"Accessories";"Smart Cover";"https://example.com/images/Laptop-7199.jpg";5;0;"6 months";17
+3;"Google Nest Thermostat";139.97;"A gaming mouse optimized for speed, precision, and durability.";"Home Gadgets";"Charger";"https://example.com/images/Home Gadget-2903.jpg";10;0;"1 year";89
+4;"Dell XPS 13";474.72;"A powerful gaming laptop with an ultra-slim design and robust performance.";"laptops";"Laptop with good specs";"https://example.com/images/Wearable-3821.jpg";15;20;"2 years";63
+5;"Microsoft Surface Pro 9";149.8;"A stylish smartwatch with fitness tracking and advanced health monitoring.";"Laptops";"Earbuds";"https://example.com/images/Laptop-1489.jpg";20;10;"6 months";45
+6;"Asus ROG Zephyrus G15 Laptop";168.85;"A fitness tracker with all-day heart rate monitoring and sleep analysis.";"Laptops";"Earbuds";"https://example.com/images/Laptop-8904.jpg";15;20;"2 years";16
+7;"Logitech MX Master 3S Mouse";1182.63;"A high-performance ultrabook with exceptional battery life.";"Accessories";"Case";"https://example.com/images/Wearable-7998.jpg";20;20;"2 years";73
+8;"Apple AirPods Pro 2nd Gen";1353.85;"A flagship smartphone with cutting-edge features and sleek design.";"Laptops";"Charger";"https://example.com/images/Home Gadget-5089.jpg";20;0;"2 years";54
+9;"Apple iPhone 15";518.68;"Next-generation wireless earbuds with improved noise cancellation.";"Smartphones";"Case";"https://example.com/images/Laptop-3675.jpg";10;30;"6 months";50
+10;"Razer DeathAdder V2 Gaming Mouse";1233.92;"A portable SSD with high-speed transfers and rugged durability.";"Accessories";"Smart Cover";"https://example.com/images/Laptop-3000.jpg";20;20;"1 year";86
+11;"Anker PowerCore Portable Charger";431.97;"A versatile tablet-laptop hybrid for productivity and creativity.";"Accessories";"Smart Cover";"https://example.com/images/Accessories-103.jpg";5;30;"6 months";29
+12;"Xiaomi Mi Smart Band 7";236.75;"A high-resolution tablet with stunning display and powerful performance.";"Wearables";"Smart Cover";"https://example.com/images/Laptop-7121.jpg";25;0;"1 year";67
+13;"Samsung Galaxy Tab S9";326.49;"A compact drone with pro-level video capture and obstacle sensing.";"Smartphones";"Charger";"https://example.com/images/Home Gadget-2551.jpg";10;20;"6 months";35
+14;"Amazon Echo Dot 5th Gen";772.2;"An ergonomic mouse with precision tracking and customizable buttons.";"Home Gadgets";"Earbuds";"https://example.com/images/Accessories-458.jpg";5;20;"6 months";21
+15;"Sony WH-1000XM5 Headphones";796.39;"A sleek mechanical keyboard with advanced wireless technology.";"Accessories";"Earbuds";"https://example.com/images/Smartphone-6233.jpg";20;10;"6 months";61
+16;"Lenovo Yoga 9i";174.61;"A premium 2-in-1 laptop with stunning visuals and sound.";"Accessories";"Smart Cover";"https://example.com/images/Laptop-4734.jpg";10;20;"1 year";25
+17;"Samsung Galaxy Watch 6";821.65;"A pro-level laptop for creatives, powered by the M2 chip.";"Smartphones";"Case";"https://example.com/images/Home Gadget-3304.jpg";10;30;"1 year";69
+18;"HP Spectre x360";215.17;"Noise-cancelling headphones with premium sound quality.";"Accessories";"Stylus";"https://example.com/images/Accessories-99.jpg";25;30;"1 year";20
+19;"Apple MacBook Pro M2";1331.55;"A high-capacity portable charger with fast charging capabilities.";"Laptops";"Smart Cover";"https://example.com/images/Accessories-200.jpg";25;0;"6 months";49
+20;"Samsung T7 Shield SSD";484.53;"A smart thermostat that learns your preferences to save energy.";"Accessories";"Case";"https://example.com/images/Wearable-9432.jpg";20;20;"2 years";82
