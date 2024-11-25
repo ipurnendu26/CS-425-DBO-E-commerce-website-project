@@ -1,5 +1,6 @@
 Plug Point Web Application
-This project is a full-stack web application tailored for a retailer specializing in E-commerce technology products. It offers users an engaging platform to browse a wide range of tech products, and place orders. The backend is powered by Node.js and Express, with MySQL handling user and order management. The frontend, built with React, provides features such as detailed product listings, review submission and management, and interactive data visualizations showcasing trending tech products.
+This project is a full-stack web application tailored for a retailer specializing in E-commerce technology products. It offers users an engaging platform to browse a wide range of tech products and place orders. The backend is powered by Python using Flask, Flask-SQLAlchemy, and Flask-CORS, with MySQL managing user and order data. The frontend, built with React, provides features such as detailed product listings, review submission and management, and interactive data visualizations showcasing trending tech products.
+
 Features
 User Roles:
 
@@ -44,9 +45,10 @@ These features empower the retailer with actionable insights to optimize invento
 
 Tech Stack
 Backend:
-Node.js
+Python (Flask, Flask-SQLAlchemy, Flask-CORS)
 Express
 MySQL (for users, products, and orders)
+
 Frontend:
 React.js
 Bootstrap
@@ -56,11 +58,33 @@ Chart.js (for data visualization)
 Setup Instructions
 Prerequisites
 Ensure the following are installed:
-Node.js (version 16 or higher)
+Python (version 3.8 or higher)
 MySQL (version 8.0 or higher)
 Git
-npm (or yarn)
+Node.js and npm (for frontend)
 
+Backend Setup
+Clone the repository and navigate to the backend folder.
+
+Install required Python packages:
+
+bash
+Copy code
+pip install flask flask-sqlalchemy pymongo python-dotenv flask-cors
+Create a .env file in the backend folder with the following content:
+
+plaintext
+Copy code
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=<your_mysql_password>
+MYSQL_DATABASE=project
+Start the backend server:
+
+bash
+Copy code
+python app.py
+The backend will run on http://localhost:5000.
 
 MySQL Configuration:
 Create a MySQL database called project.
@@ -77,13 +101,8 @@ MYSQL_PASSWORD=<your_mysql_password>
 MYSQL_DATABASE=project
 PORT=3001
 
-Start the backend server:
-bash
-Copy code
-npm install
-node server.js
 
-Step 3: Frontend Setup
+Step 2: Frontend Setup
 Install frontend dependencies:
 
 Start the frontend server:
@@ -156,8 +175,9 @@ CREATE TABLE store_locations (
     state VARCHAR(50) NOT NULL,
     zipcode VARCHAR(10) NOT NULL
 );
-Insert sample data:
 
+Insert sample data:
+You can insert CSV files from the SQL CSV Data Folder
 Add at least 20 records to the users, products, CustomerOrder, and orders tables for testing purposes.
 
 
