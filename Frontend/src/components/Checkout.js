@@ -9,7 +9,8 @@ const Checkout = ({ cartItems }) => {
     state: "",
     zipCode: "",
   });
-  const [creditCard, setCreditCard] = useState("");
+  const [paymentToken, setPaymentToken] = useState("");
+  const [cardLast4, setCardLast4] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState("homeDelivery");
   const [storeLocation, setStoreLocation] = useState("");
   const [storeLocations, setStoreLocations] = useState([]);
@@ -60,10 +61,9 @@ const Checkout = ({ cartItems }) => {
       return;
     }
 
-    // Validate credit card input
-    const creditCardRegex = /^[0-9]+$/;
-    if (!creditCardRegex.test(creditCard)) {
-      alert("Credit card number must contain only numbers.");
+    // This educational demo accepts a token/reference, never a full card number.
+    if (paymentToken.trim().length < 6 || !/^[0-9]{4}$/.test(cardLast4)) {
+      alert("Enter a demo payment token and the final four digits only.");
       return;
     }
 
@@ -94,7 +94,8 @@ const Checkout = ({ cartItems }) => {
       deliveryDate: formattedDeliveryDate,
       cartItems: updatedCartItems, // Pass updated cartItems with product_id and quantity
       address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
-      creditCard,
+      paymentToken,
+      cardLast4,
     };
 
     // Send order to the server
@@ -244,25 +245,33 @@ const Checkout = ({ cartItems }) => {
           </div>
         </div>
 
-        {/* Credit Card Info */}
+        {/* Demo payment reference: never collect or store a full card number. */}
         <div className="mb-3">
-          <label htmlFor="creditCard" className="form-label">
-            Credit Card
+          <label htmlFor="paymentToken" className="form-label">
+            Demo Payment Token
           </label>
           <input
             type="text"
             className="form-control"
-            id="creditCard"
-            value={creditCard}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^[0-9]*$/.test(value)) {
-                // Allow only numeric characters
-                setCreditCard(value);
-              } else {
-                alert("Credit card number must contain only numbers.");
-              }
-            }}
+            id="paymentToken"
+            value={paymentToken}
+            onChange={(e) => setPaymentToken(e.target.value)}
+            placeholder="token_from_payment_provider"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="cardLast4" className="form-label">
+            Card last four digits
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength="4"
+            className="form-control"
+            id="cardLast4"
+            value={cardLast4}
+            onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, ""))}
             required
           />
         </div>

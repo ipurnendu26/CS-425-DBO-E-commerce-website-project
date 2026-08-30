@@ -5,19 +5,26 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if origin.strip()
+]
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
 
-# Database connection configuration
+# Database credentials must be supplied through the environment.
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'rishabh',  # Replace with your MySQL root password
-    'database': 'project'
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "port": int(os.getenv("MYSQL_PORT", "3306")),
+    "user": os.getenv("MYSQL_USER", "app_user"),
+    "password": os.getenv("MYSQL_PASSWORD", ""),
+    "database": os.getenv("MYSQL_DATABASE", "project"),
 }
 
 # Connect to the MySQL database
@@ -37,22 +44,25 @@ def signup():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
-    role = data.get('role')
+    # Public sign-up cannot grant privileged store-manager access.
+    role = "customer"
 
-    if not all([name, email, password, role]):
-        return jsonify({"message": "All fields are required"}), 400
+    if not all([name, email, password]):
+        return jsonify({"message": "Name, email, and password are required"}), 400
+    if len(password) < 10:
+        return jsonify({"message": "Password must contain at least 10 characters"}), 400
 
     query = "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)"
     connection = get_db_connection()
     cursor = connection.cursor()
 
     try:
-        cursor.execute(query, (name, email, password, role))
+        cursor.execute(query, (name, email, generate_password_hash(password), role))
         connection.commit()
         return jsonify({"message": "User registered successfully"}), 200
     except Error as e:
         print(f"Error registering user: {e}")
-        return jsonify({"message": "Error registering user", "error": str(e)}), 500
+        return jsonify({"message": "Error registering user"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -75,7 +85,7 @@ def login():
         cursor.execute(query, (email,))
         user = cursor.fetchone()
 
-        if not user or user['password'] != password:
+        if not user or not check_password_hash(user['password'], password):
             return jsonify({"message": "Invalid email or password"}), 401
 
         return jsonify({
@@ -87,7 +97,7 @@ def login():
         }), 200
     except Error as e:
         print(f"Error logging in user: {e}")
-        return jsonify({"message": "Internal server error", "error": str(e)}), 500
+        return jsonify({"message": "Internal server error"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -113,7 +123,7 @@ def get_products():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching products: {e}")
-        return jsonify({"message": "Error fetching products", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching products"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -144,7 +154,7 @@ def add_product():
         return jsonify({"message": "Product added successfully", "productId": cursor.lastrowid}), 201
     except Error as e:
         print(f"Error adding product: {e}")
-        return jsonify({"message": "Error adding product", "error": str(e)}), 500
+        return jsonify({"message": "Error adding product"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -180,7 +190,7 @@ def update_product(id):
         return jsonify({"message": "Product updated successfully"}), 200
     except Error as e:
         print(f"Error updating product: {e}")
-        return jsonify({"message": "Error updating product", "error": str(e)}), 500
+        return jsonify({"message": "Error updating product"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -202,7 +212,7 @@ def delete_product(id):
         return jsonify({"message": "Product deleted successfully"}), 200
     except Error as e:
         print(f"Error deleting product: {e}")
-        return jsonify({"message": "Error deleting product", "error": str(e)}), 500
+        return jsonify({"message": "Error deleting product"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -220,10 +230,11 @@ def place_order():
     delivery_date = data.get('deliveryDate')
     cart_items = data.get('cartItems', [])
     address = data.get('address')
-    credit_card = data.get('creditCard')
+    payment_token = data.get('paymentToken')
+    card_last4 = str(data.get('cardLast4', ''))[-4:]
 
     # Validate required fields
-    if not all([user_id, name, total_price, delivery_method, cart_items, address, credit_card]) or (
+    if not all([user_id, name, total_price, delivery_method, cart_items, address, payment_token, card_last4]) or (
         delivery_method == 'inStorePickup' and not store_location):
         return jsonify({"message": "Missing required order information"}), 400
 
@@ -256,14 +267,14 @@ def place_order():
                 VALUES (%s, %s, %s, %s, %s)
             """
             cursor.execute(customer_order_query, (
-                name, item['name'], item['price'], address, credit_card
+                name, item['name'], item['price'], address, card_last4
             ))
             connection.commit()
 
         return jsonify({"message": "Order placed successfully"}), 200
     except Error as e:
         print(f"Error placing order: {e}")
-        return jsonify({"message": "Error placing order", "error": str(e)}), 500
+        return jsonify({"message": "Error placing order"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -286,7 +297,7 @@ def get_past_orders(user_id):
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching past orders: {e}")
-        return jsonify({"message": "Error fetching past orders", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching past orders"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -312,7 +323,7 @@ def cancel_order(order_id):
         return jsonify({"message": "Order deleted successfully"}), 200
     except Error as e:
         print(f"Error deleting order: {e}")
-        return jsonify({"message": "Error deleting order", "error": str(e)}), 500
+        return jsonify({"message": "Error deleting order"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -343,7 +354,7 @@ def add_order():
         return jsonify({"message": "Order added successfully"}), 201
     except Error as e:
         print(f"Error adding order: {e}")
-        return jsonify({"message": "Error adding order", "error": str(e)}), 500
+        return jsonify({"message": "Error adding order"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -362,7 +373,7 @@ def fetch_orders():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching orders: {e}")
-        return jsonify({"message": "Error fetching orders", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching orders"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -398,7 +409,7 @@ def update_order(id):
         return jsonify({"message": "Order updated successfully"}), 200
     except Error as e:
         print(f"Error updating order: {e}")
-        return jsonify({"message": "Error updating order", "error": str(e)}), 500
+        return jsonify({"message": "Error updating order"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -421,7 +432,7 @@ def delete_order(id):
         return jsonify({"message": "Order deleted successfully"}), 200
     except Error as e:
         print(f"Error deleting order: {e}")
-        return jsonify({"message": "Error deleting order", "error": str(e)}), 500
+        return jsonify({"message": "Error deleting order"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -444,7 +455,7 @@ def fetch_product_by_id(id):
         return jsonify(result), 200
     except Error as e:
         print(f"Error fetching product details: {e}")
-        return jsonify({"message": "Error fetching product details", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching product details"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -469,7 +480,7 @@ def get_top_zipcodes():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching top zip codes: {e}")
-        return jsonify({"message": "Error fetching top zip codes", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching top zip codes"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -494,7 +505,7 @@ def get_most_sold_products():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching most sold products: {e}")
-        return jsonify({"message": "Error fetching most sold products", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching most sold products"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -512,7 +523,7 @@ def get_store_locations():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching store locations: {e}")
-        return jsonify({"message": "Error fetching store locations", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching store locations"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -535,7 +546,7 @@ def get_accessories():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching accessories: {e}")
-        return jsonify({"message": "Error fetching accessories", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching accessories"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -557,7 +568,7 @@ def get_products_inventory():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching inventory: {e}")
-        return jsonify({"message": "Error fetching inventory", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching inventory"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -579,7 +590,7 @@ def get_bar_chart_data():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching bar chart data: {e}")
-        return jsonify({"message": "Error fetching bar chart data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching bar chart data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -602,7 +613,7 @@ def get_products_on_sale():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching products on sale: {e}")
-        return jsonify({"message": "Error fetching products on sale", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching products on sale"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -625,7 +636,7 @@ def get_products_with_rebates():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching products with rebates: {e}")
-        return jsonify({"message": "Error fetching products with rebates", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching products with rebates"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -649,7 +660,7 @@ def get_products_sold():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching sold products: {e}")
-        return jsonify({"message": "Error fetching sold products", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching sold products"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -672,7 +683,7 @@ def get_products_sales_chart():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching sales chart data: {e}")
-        return jsonify({"message": "Error fetching sales chart data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching sales chart data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -695,7 +706,7 @@ def get_daily_sales():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching daily sales: {e}")
-        return jsonify({"message": "Error fetching daily sales", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching daily sales"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -720,7 +731,7 @@ def get_top_customers():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching top customers: {e}")
-        return jsonify({"message": "Error fetching top customers", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching top customers"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -748,7 +759,7 @@ def get_popular_products_by_category():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching popular products by category: {e}")
-        return jsonify({"message": "Error fetching popular products by category", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching popular products by category"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -773,7 +784,7 @@ def get_inactive_customers():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching inactive customers: {e}")
-        return jsonify({"message": "Error fetching inactive customers", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching inactive customers"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -811,7 +822,7 @@ def get_customer_retention():
         return jsonify(results or {}), 200
     except Error as e:
         print(f"Error calculating customer retention rate: {e}")
-        return jsonify({"message": "Error calculating customer retention rate", "error": str(e)}), 500
+        return jsonify({"message": "Error calculating customer retention rate"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -834,7 +845,7 @@ def get_average_sales():
         return jsonify(result or {"average_sales": 0}), 200
     except Error as e:
         print(f"Error fetching average sales: {e}")
-        return jsonify({"message": "Error fetching average sales", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching average sales"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -868,7 +879,7 @@ def customer_segmentation():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching customer segmentation data: {e}")
-        return jsonify({"message": "Error fetching customer segmentation data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching customer segmentation data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -898,7 +909,7 @@ def product_cross_sell():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching cross-sell data: {e}")
-        return jsonify({"message": "Error fetching cross-sell data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching cross-sell data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -930,7 +941,7 @@ def customer_lifetime_value():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching customer lifetime value data: {e}")
-        return jsonify({"message": "Error fetching customer lifetime value data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching customer lifetime value data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -956,7 +967,7 @@ def seasonal_sales_analysis():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching seasonal sales analysis data: {e}")
-        return jsonify({"message": "Error fetching seasonal sales analysis data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching seasonal sales analysis data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -993,7 +1004,7 @@ def purchase_frequency():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching purchase frequency data: {e}")
-        return jsonify({"message": "Error fetching purchase frequency data", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching purchase frequency data"}), 500
     finally:
         cursor.close()
         connection.close()
@@ -1021,11 +1032,15 @@ def autocomplete():
         return jsonify(results), 200
     except Error as e:
         print(f"Error fetching autocomplete suggestions: {e}")
-        return jsonify({"message": "Error fetching autocomplete suggestions", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching autocomplete suggestions"}), 500
     finally:
         cursor.close()
         connection.close()
 
 # Start the server
 if __name__ == '__main__':
-    app.run(port=3001, debug=True)
+    app.run(
+        host=os.getenv("HOST", "127.0.0.1"),
+        port=int(os.getenv("PORT", "3001")),
+        debug=os.getenv("FLASK_DEBUG", "false").lower() == "true",
+    )
